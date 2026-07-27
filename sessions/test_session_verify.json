@@ -1,0 +1,224 @@
+[
+  {
+    "level_number": 1,
+    "telemetry": {
+      "time_taken_sec": 20.0,
+      "damage_taken": 0,
+      "health_remaining": 100,
+      "deaths_retries": 0,
+      "enemies_killed": 5,
+      "total_enemies": 5,
+      "chests_opened": 2,
+      "total_chests": 2,
+      "traps_triggered": 0,
+      "exploration_percent": 90
+    },
+    "user_preference": "Make it much harder!",
+    "previous_config": {
+      "theme": "dark",
+      "layout_style": "corridor-heavy",
+      "corridor_width": 1,
+      "room_density": 0.5,
+      "enemy_density": 0.3,
+      "enemy_type": "ambush",
+      "difficulty": 0.75,
+      "trap_probability": 0.25,
+      "visibility": "low",
+      "reward_density": 0.15,
+      "theme_name": "Dark Obsidian Abyss",
+      "palette": {
+        "background": "#050609",
+        "wall": "#111422",
+        "floor": "#1e2436",
+        "corridor": "#181d2e",
+        "door": "#8b5cf6",
+        "trap": "#ef4444",
+        "enemy": "#f43f5e",
+        "chest": "#f59e0b",
+        "start": "#10b981",
+        "exit": "#06b6d4",
+        "fog": "#050609"
+      }
+    },
+    "llm_eval": {
+      "playstyle_assessment": "Cluster Alpha: Blitz Krieger (Ultra-Fast Clear, High Combat Efficiency) [Unsupervised Clustering]",
+      "adaptation_rationale": "Player completed previous level effortlessly with minimal damage. Elevating difficulty significantly and enabling ambush AI with reduced visibility. Narrative Degrade: 'Act II: The Corrupted Abyss' - Dark void magic erodes the sanctuary pillars, spawning dimensional rifts. [Asymmetric Dual-Path Route Activated] [Dungeon reacted defensively to aggressive melee rush by reinforcing corridor chokepoints and ambush traps.]",
+      "next_config": {
+        "theme": "dark",
+        "layout_style": "corridor-heavy",
+        "corridor_width": 1,
+        "room_density": 0.55,
+        "enemy_density": 0.4,
+        "enemy_type": "ambush",
+        "difficulty": 1.0,
+        "trap_probability": 0.35,
+        "visibility": "low",
+        "reward_density": 0.15,
+        "theme_name": "Dark Obsidian Abyss",
+        "palette": {
+          "background": "#050609",
+          "wall": "#111422",
+          "floor": "#1e2436",
+          "corridor": "#181d2e",
+          "door": "#8b5cf6",
+          "trap": "#ef4444",
+          "enemy": "#f43f5e",
+          "chest": "#f59e0b",
+          "start": "#10b981",
+          "exit": "#06b6d4",
+          "fog": "#050609"
+        }
+      },
+      "narrative_isomorphism": {
+        "title": "Act II: The Corrupted Abyss",
+        "lore": "Dark void magic erodes the sanctuary pillars, spawning dimensional rifts.",
+        "degrade_factor": 0.25,
+        "theme": "dark"
+      }
+    },
+    "next_config": {
+      "theme": "dark",
+      "layout_style": "room-heavy",
+      "corridor_width": 1,
+      "room_density": 0.55,
+      "enemy_density": 0.4,
+      "enemy_type": "ambush",
+      "difficulty": 1.0,
+      "trap_probability": 0.35,
+      "visibility": "low",
+      "reward_density": 0.15,
+      "theme_name": "Dark Obsidian Abyss",
+      "palette": {
+        "background": "#050609",
+        "wall": "#111422",
+        "floor": "#1e2436",
+        "corridor": "#181d2e",
+        "door": "#8b5cf6",
+        "trap": "#ef4444",
+        "enemy": "#f43f5e",
+        "chest": "#f59e0b",
+        "start": "#10b981",
+        "exit": "#06b6d4",
+        "fog": "#050609"
+      }
+    },
+    "research_toggles": {
+      "f6_clustering": true,
+      "f7_isomorphism": true,
+      "f8_dual_path": true,
+      "f9_living_dungeon": true
+    },
+    "timestamp": 1785083811.0588036
+  },
+  {
+    "level_number": 1,
+    "telemetry": {
+      "time_taken_sec": 20.0,
+      "damage_taken": 0,
+      "health_remaining": 100,
+      "deaths_retries": 0,
+      "enemies_killed": 5,
+      "total_enemies": 5,
+      "chests_opened": 2,
+      "total_chests": 2,
+      "traps_triggered": 0,
+      "exploration_percent": 90
+    },
+    "user_preference": "Make it much harder!",
+    "previous_config": {
+      "theme": "dark",
+      "layout_style": "corridor-heavy",
+      "corridor_width": 1,
+      "room_density": 0.5,
+      "enemy_density": 0.3,
+      "enemy_type": "ambush",
+      "difficulty": 0.75,
+      "trap_probability": 0.25,
+      "visibility": "low",
+      "reward_density": 0.15,
+      "theme_name": "Dark Obsidian Abyss",
+      "palette": {
+        "background": "#050609",
+        "wall": "#111422",
+        "floor": "#1e2436",
+        "corridor": "#181d2e",
+        "door": "#8b5cf6",
+        "trap": "#ef4444",
+        "enemy": "#f43f5e",
+        "chest": "#f59e0b",
+        "start": "#10b981",
+        "exit": "#06b6d4",
+        "fog": "#050609"
+      }
+    },
+    "llm_eval": {
+      "playstyle_assessment": "Cluster Alpha: Blitz Krieger (Ultra-Fast Clear, High Combat Efficiency) [Unsupervised Clustering]",
+      "adaptation_rationale": "Player completed previous level effortlessly with minimal damage. Elevating difficulty significantly and enabling ambush AI with reduced visibility. Narrative Degrade: 'Act II: The Corrupted Abyss' - Dark void magic erodes the sanctuary pillars, spawning dimensional rifts. [Asymmetric Dual-Path Route Activated] [Dungeon reacted defensively to aggressive melee rush by reinforcing corridor chokepoints and ambush traps.]",
+      "next_config": {
+        "theme": "dark",
+        "layout_style": "corridor-heavy",
+        "corridor_width": 1,
+        "room_density": 0.55,
+        "enemy_density": 0.4,
+        "enemy_type": "ambush",
+        "difficulty": 1.0,
+        "trap_probability": 0.35,
+        "visibility": "low",
+        "reward_density": 0.15,
+        "theme_name": "Dark Obsidian Abyss",
+        "palette": {
+          "background": "#050609",
+          "wall": "#111422",
+          "floor": "#1e2436",
+          "corridor": "#181d2e",
+          "door": "#8b5cf6",
+          "trap": "#ef4444",
+          "enemy": "#f43f5e",
+          "chest": "#f59e0b",
+          "start": "#10b981",
+          "exit": "#06b6d4",
+          "fog": "#050609"
+        }
+      },
+      "narrative_isomorphism": {
+        "title": "Act II: The Corrupted Abyss",
+        "lore": "Dark void magic erodes the sanctuary pillars, spawning dimensional rifts.",
+        "degrade_factor": 0.25,
+        "theme": "dark"
+      }
+    },
+    "next_config": {
+      "theme": "dark",
+      "layout_style": "room-heavy",
+      "corridor_width": 1,
+      "room_density": 0.55,
+      "enemy_density": 0.4,
+      "enemy_type": "ambush",
+      "difficulty": 1.0,
+      "trap_probability": 0.35,
+      "visibility": "low",
+      "reward_density": 0.15,
+      "theme_name": "Dark Obsidian Abyss",
+      "palette": {
+        "background": "#050609",
+        "wall": "#111422",
+        "floor": "#1e2436",
+        "corridor": "#181d2e",
+        "door": "#8b5cf6",
+        "trap": "#ef4444",
+        "enemy": "#f43f5e",
+        "chest": "#f59e0b",
+        "start": "#10b981",
+        "exit": "#06b6d4",
+        "fog": "#050609"
+      }
+    },
+    "research_toggles": {
+      "f6_clustering": true,
+      "f7_isomorphism": true,
+      "f8_dual_path": true,
+      "f9_living_dungeon": true
+    },
+    "timestamp": 1785083842.6707866
+  }
+]

@@ -1,0 +1,71 @@
+[
+  {
+    "level_number": 1,
+    "telemetry": {
+      "time_taken_sec": 18.0,
+      "damage_taken": 10,
+      "health_remaining": 90,
+      "deaths_retries": 0,
+      "enemies_killed": 8,
+      "total_enemies": 8,
+      "chests_opened": 3,
+      "total_chests": 3,
+      "traps_triggered": 0,
+      "exploration_percent": 90
+    },
+    "user_preference": "Make it much harder!",
+    "previous_config": {
+      "theme": "dark",
+      "layout_style": "balanced",
+      "corridor_width": 1,
+      "room_density": 0.5,
+      "enemy_density": 0.15,
+      "enemy_type": "ambush",
+      "difficulty": 0.5,
+      "trap_probability": 0.12,
+      "visibility": "normal",
+      "reward_density": 0.08
+    },
+    "llm_eval": {
+      "playstyle_assessment": "Cluster Alpha: Blitz Krieger (Ultra-Fast Clear, High Combat Efficiency) [Unsupervised Clustering]",
+      "adaptation_rationale": "Player completed previous level effortlessly with minimal damage. Elevating difficulty significantly and enabling ambush AI with reduced visibility. Narrative Degrade: 'Act II: The Corrupted Abyss' - Dark void magic erodes the sanctuary pillars, spawning dimensional rifts. [Asymmetric Dual-Path Route Activated] [Dungeon reacted defensively to aggressive melee rush by reinforcing corridor chokepoints and ambush traps.]",
+      "next_config": {
+        "theme": "dark",
+        "layout_style": "balanced",
+        "corridor_width": 1,
+        "room_density": 0.55,
+        "enemy_density": 0.30000000000000004,
+        "enemy_type": "ambush",
+        "difficulty": 0.75,
+        "trap_probability": 0.26249999999999996,
+        "visibility": "low",
+        "reward_density": 0.08
+      },
+      "narrative_isomorphism": {
+        "title": "Act II: The Corrupted Abyss",
+        "lore": "Dark void magic erodes the sanctuary pillars, spawning dimensional rifts.",
+        "degrade_factor": 0.25,
+        "theme": "dark"
+      }
+    },
+    "next_config": {
+      "theme": "dark",
+      "layout_style": "room-heavy",
+      "corridor_width": 1,
+      "room_density": 0.55,
+      "enemy_density": 0.30000000000000004,
+      "enemy_type": "ambush",
+      "difficulty": 0.75,
+      "trap_probability": 0.26249999999999996,
+      "visibility": "low",
+      "reward_density": 0.08
+    },
+    "research_toggles": {
+      "f6_clustering": true,
+      "f7_isomorphism": true,
+      "f8_dual_path": true,
+      "f9_living_dungeon": true
+    },
+    "timestamp": 1784697877.0847557
+  }
+]

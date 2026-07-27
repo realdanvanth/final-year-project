@@ -1,0 +1,116 @@
+[
+  {
+    "level_number": 1,
+    "telemetry": {
+      "time_taken_sec": 12.8,
+      "damage_taken": 0,
+      "health_remaining": 100,
+      "deaths_retries": 0,
+      "enemies_killed": 7,
+      "total_enemies": 7,
+      "chests_opened": 3,
+      "total_chests": 3,
+      "traps_triggered": 0,
+      "exploration_percent": 95
+    },
+    "user_preference": "Make the game overall much harder for the next level!",
+    "previous_config": {
+      "theme": "dark",
+      "layout_style": "room-heavy",
+      "corridor_width": 2,
+      "room_density": 0.75,
+      "enemy_density": 0.3,
+      "enemy_type": "ambush",
+      "difficulty": 0.75,
+      "trap_probability": 0.25,
+      "visibility": "low",
+      "reward_density": 0.15
+    },
+    "llm_eval": {
+      "playstyle_assessment": "High Skill Speedrunner",
+      "adaptation_rationale": "Player completed previous level effortlessly with minimal damage. Elevating difficulty significantly and enabling ambush AI with reduced visibility.",
+      "next_config": {
+        "theme": "dark",
+        "layout_style": "room-heavy",
+        "corridor_width": 1,
+        "room_density": 0.8,
+        "enemy_density": 0.4,
+        "enemy_type": "ambush",
+        "difficulty": 1.0,
+        "trap_probability": 0.35,
+        "visibility": "low",
+        "reward_density": 0.15
+      }
+    },
+    "next_config": {
+      "theme": "dark",
+      "layout_style": "room-heavy",
+      "corridor_width": 1,
+      "room_density": 0.8,
+      "enemy_density": 0.4,
+      "enemy_type": "ambush",
+      "difficulty": 1.0,
+      "trap_probability": 0.35,
+      "visibility": "low",
+      "reward_density": 0.15
+    },
+    "timestamp": 1784696220.6972144
+  },
+  {
+    "level_number": 2,
+    "telemetry": {
+      "time_taken_sec": 15.0,
+      "damage_taken": 10,
+      "health_remaining": 90,
+      "deaths_retries": 0,
+      "enemies_killed": 10,
+      "total_enemies": 10,
+      "chests_opened": 2,
+      "total_chests": 2,
+      "traps_triggered": 1,
+      "exploration_percent": 88
+    },
+    "user_preference": "AUTO-PROGRESS: Autonomous AI Director playstyle evaluation and progression upgrade.",
+    "previous_config": {
+      "theme": "dark",
+      "layout_style": "room-heavy",
+      "corridor_width": 1,
+      "room_density": 0.8,
+      "enemy_density": 0.4,
+      "enemy_type": "ambush",
+      "difficulty": 1.0,
+      "trap_probability": 0.35,
+      "visibility": "low",
+      "reward_density": 0.15
+    },
+    "llm_eval": {
+      "playstyle_assessment": "High Skill Speedrunner",
+      "adaptation_rationale": "Player demonstrated high skill speed. Scaling up difficulty and enemy density.",
+      "next_config": {
+        "theme": "dark",
+        "layout_style": "room-heavy",
+        "corridor_width": 1,
+        "room_density": 0.8,
+        "enemy_density": 0.4,
+        "enemy_type": "ambush",
+        "difficulty": 1.0,
+        "trap_probability": 0.35,
+        "visibility": "low",
+        "reward_density": 0.15
+      }
+    },
+    "next_config": {
+      "theme": "dark",
+      "layout_style": "room-heavy",
+      "corridor_width": 1,
+      "room_density": 0.8,
+      "enemy_density": 0.4,
+      "enemy_type": "ambush",
+      "difficulty": 1.0,
+      "trap_probability": 0.35,
+      "visibility": "low",
+      "reward_density": 0.15
+    },
+    "timestamp": 1784696221.627118
+  }
+]

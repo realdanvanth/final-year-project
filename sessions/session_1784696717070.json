@@ -1,0 +1,122 @@
+[
+  {
+    "level_number": 1,
+    "telemetry": {
+      "startTime": 4368,
+      "endTime": 87727,
+      "time_taken_sec": 83.361,
+      "damage_taken": 45,
+      "health_remaining": 100,
+      "deaths_retries": 0,
+      "enemies_killed": 3,
+      "total_enemies": 10,
+      "chests_opened": 19,
+      "total_chests": 120,
+      "traps_triggered": 3,
+      "exploration_percent": 100,
+      "segment_times": []
+    },
+    "user_preference": "Make the game much harder! I had it too easy!",
+    "previous_config": {
+      "theme": "dark",
+      "layout_style": "balanced",
+      "corridor_width": 2,
+      "room_density": 0.5,
+      "enemy_density": 0.2,
+      "enemy_type": "patrol",
+      "difficulty": 0.5,
+      "trap_probability": 0.15,
+      "visibility": "normal",
+      "reward_density": 0.15
+    },
+    "llm_eval": {
+      "playstyle_assessment": "Cautious Explorer",
+      "adaptation_rationale": "Increasing difficulty per user request while balancing enemy pressure.",
+      "next_config": {
+        "theme": "dark",
+        "layout_style": "balanced",
+        "corridor_width": 2,
+        "room_density": 0.55,
+        "enemy_density": 0.26,
+        "enemy_type": "patrol",
+        "difficulty": 0.65,
+        "trap_probability": 0.22749999999999998,
+        "visibility": "normal",
+        "reward_density": 0.15
+      }
+    },
+    "next_config": {
+      "theme": "dark",
+      "layout_style": "balanced",
+      "corridor_width": 2,
+      "room_density": 0.55,
+      "enemy_density": 0.26,
+      "enemy_type": "patrol",
+      "difficulty": 0.65,
+      "trap_probability": 0.22749999999999998,
+      "visibility": "normal",
+      "reward_density": 0.15
+    },
+    "timestamp": 1784696816.850305
+  },
+  {
+    "level_number": 2,
+    "telemetry": {
+      "startTime": 101834,
+      "endTime": 117733,
+      "time_taken_sec": 15.899,
+      "damage_taken": 0,
+      "health_remaining": 100,
+      "deaths_retries": 0,
+      "enemies_killed": 1,
+      "total_enemies": 14,
+      "chests_opened": 2,
+      "total_chests": 125,
+      "traps_triggered": 0,
+      "exploration_percent": 42.16609589041096,
+      "segment_times": []
+    },
+    "user_preference": "Add more puzzle traps and hidden corridors",
+    "previous_config": {
+      "theme": "dark",
+      "layout_style": "balanced",
+      "corridor_width": 2,
+      "room_density": 0.55,
+      "enemy_density": 0.26,
+      "enemy_type": "patrol",
+      "difficulty": 0.65,
+      "trap_probability": 0.2275,
+      "visibility": "normal",
+      "reward_density": 0.15
+    },
+    "llm_eval": {
+      "playstyle_assessment": "High Skill Speedrunner",
+      "adaptation_rationale": "Player demonstrated high skill speed. Scaling up difficulty and enemy density.",
+      "next_config": {
+        "theme": "dark",
+        "layout_style": "balanced",
+        "corridor_width": 2,
+        "room_density": 0.6000000000000001,
+        "enemy_density": 0.32000000000000006,
+        "enemy_type": "patrol",
+        "difficulty": 0.8,
+        "trap_probability": 0.27999999999999997,
+        "visibility": "normal",
+        "reward_density": 0.15
+      }
+    },
+    "next_config": {
+      "theme": "dark",
+      "layout_style": "balanced",
+      "corridor_width": 2,
+      "room_density": 0.6000000000000001,
+      "enemy_density": 0.32000000000000006,
+      "enemy_type": "patrol",
+      "difficulty": 0.8,
+      "trap_probability": 0.27999999999999997,
+      "visibility": "normal",
+      "reward_density": 0.15
+    },
+    "timestamp": 1784696838.7950451
+  }
+]

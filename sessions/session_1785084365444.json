@@ -1,0 +1,92 @@
+[
+  {
+    "level_number": 1,
+    "telemetry": {
+      "startTime": 7760,
+      "endTime": 29356,
+      "time_taken_sec": 21.596,
+      "damage_taken": 15,
+      "health_remaining": 100,
+      "deaths_retries": 0,
+      "enemies_killed": 0,
+      "total_enemies": 15,
+      "chests_opened": 6,
+      "total_chests": 192,
+      "traps_triggered": 1,
+      "exploration_percent": 43.24726911618669,
+      "segment_times": []
+    },
+    "user_preference": "Spawn dense ambush monster hordes",
+    "previous_config": {
+      "theme_name": "Ancient Castle Ruins",
+      "theme": "dark",
+      "palette": {
+        "background": "#1A1A1A",
+        "wall": "#3A2E32",
+        "floor": "#5A4A42",
+        "corridor": "#4A3A32",
+        "door": "#7A5A42",
+        "trap": "#8B0000",
+        "enemy": "#800020",
+        "chest": "#D4AF37",
+        "start": "#228B22",
+        "exit": "#FF4500",
+        "fog": "#2F4F4F"
+      },
+      "map_width": 75,
+      "map_height": 75,
+      "layout_style": "room-heavy",
+      "corridor_width": 2,
+      "room_density": 0.7,
+      "enemy_density": 0.3,
+      "enemy_type": "patrol",
+      "difficulty": 0.6,
+      "trap_probability": 0.25,
+      "visibility": "low",
+      "reward_density": 0.2,
+      "seed": 372937
+    },
+    "llm_eval": {
+      "playstyle_assessment": "Cluster Delta: Methodical Sentry (Balanced Tactical Navigation) [Unsupervised Clustering]",
+      "adaptation_rationale": "The player cleared Level 1 quickly despite limited exploration and engagement with enemies but desires denser, ambush-focused combat. To meet their preference, the next level will feature higher enemy density, ambush tactics, narrower corridors, and reduced visibility to amplify tension and challenge. Narrative Degrade: 'Act II: The Corrupted Abyss' - Dark void magic erodes the sanctuary pillars, spawning dimensional rifts. [Asymmetric Dual-Path Route Activated] [Dungeon dynamically recalibrated enemy patrol routes.]",
+      "next_config": {
+        "theme": "dark",
+        "layout_style": "room-heavy",
+        "corridor_width": 1,
+        "room_density": 0.7,
+        "enemy_density": 0.45,
+        "enemy_type": "ambush",
+        "difficulty": 0.85,
+        "trap_probability": 0.35,
+        "visibility": "low",
+        "reward_density": 0.15
+      },
+      "narrative_isomorphism": {
+        "title": "Act II: The Corrupted Abyss",
+        "lore": "Dark void magic erodes the sanctuary pillars, spawning dimensional rifts.",
+        "degrade_factor": 0.25,
+        "theme": "dark"
+      }
+    },
+    "next_config": {
+      "theme": "dark",
+      "layout_style": "room-heavy",
+      "corridor_width": 2,
+      "room_density": 0.7,
+      "enemy_density": 0.45,
+      "enemy_type": "ambush",
+      "difficulty": 0.85,
+      "trap_probability": 0.35,
+      "visibility": "low",
+      "reward_density": 0.15,
+      "seed": 406016
+    },
+    "research_toggles": {
+      "f6_clustering": true,
+      "f7_isomorphism": true,
+      "f8_dual_path": true,
+      "f9_living_dungeon": true
+    },
+    "timestamp": 1785084406.3893206
+  }
+]

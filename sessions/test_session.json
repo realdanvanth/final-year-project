@@ -1,0 +1,59 @@
+[
+  {
+    "level_number": 1,
+    "telemetry": {
+      "time_taken_sec": 19.2,
+      "damage_taken": 0,
+      "health_remaining": 100,
+      "deaths_retries": 0,
+      "enemies_killed": 6,
+      "total_enemies": 6,
+      "chests_opened": 2,
+      "total_chests": 2,
+      "traps_triggered": 0,
+      "exploration_percent": 85
+    },
+    "user_preference": "Make the game much harder! I had it too easy!",
+    "previous_config": {
+      "theme": "dark",
+      "layout_style": "balanced",
+      "corridor_width": 2,
+      "room_density": 0.5,
+      "enemy_density": 0.2,
+      "enemy_type": "patrol",
+      "difficulty": 0.5,
+      "trap_probability": 0.15,
+      "visibility": "normal",
+      "reward_density": 0.15
+    },
+    "llm_eval": {
+      "playstyle_assessment": "High Skill Speedrunner",
+      "adaptation_rationale": "Player completed previous level effortlessly with minimal damage. Elevating difficulty significantly and enabling ambush AI with reduced visibility.",
+      "next_config": {
+        "theme": "dark",
+        "layout_style": "balanced",
+        "corridor_width": 1,
+        "room_density": 0.55,
+        "enemy_density": 0.30000000000000004,
+        "enemy_type": "ambush",
+        "difficulty": 0.75,
+        "trap_probability": 0.26249999999999996,
+        "visibility": "low",
+        "reward_density": 0.15
+      }
+    },
+    "next_config": {
+      "theme": "dark",
+      "layout_style": "balanced",
+      "corridor_width": 1,
+      "room_density": 0.55,
+      "enemy_density": 0.30000000000000004,
+      "enemy_type": "ambush",
+      "difficulty": 0.75,
+      "trap_probability": 0.26249999999999996,
+      "visibility": "low",
+      "reward_density": 0.15
+    },
+    "timestamp": 1784695695.2225451
+  }
+]

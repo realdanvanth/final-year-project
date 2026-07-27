@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Closed-Loop LLM PCG Research Platform & Game Engine</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <header>
+    <div class="logo-group">
+      <span class="logo-icon">🔮</span>
+      <div>
+        <h1>Closed-Loop LLM PCG Engine v2</h1>
+        <p class="subtitle">Procedural Content Generation with LLM Guidance & Adaptive Playstyle Feedback Loop</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 0.8rem; align-items: center;">
+      <button id="muteBtn" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="toggleAudio()">
+        🔊 Audio: ON
+      </button>
+      <div class="badge">
+        <span class="badge-pulse"></span>
+        <span>OPENROUTER GEMMA-3 LIVE</span>
+      </div>
+      <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="exportSessionData()">
+        📥 Export Research JSON
+      </button>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <!-- Left Column: Playable Canvas Game Engine -->
+    <div class="glass-panel" style="position: relative;">
+      <div class="panel-title">
+        <span>🎮 Dungeon Game Engine</span>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <span id="hudThemeBadge" class="badge" style="font-size: 0.65rem;">Dark Obsidian</span>
+          <span id="hudLevel" style="color: var(--accent); font-weight: bold;">Lvl 1</span>
+        </div>
+      </div>
+
+      <div class="canvas-container">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- HUD Overlay -->
+        <div class="hud-overlay">
+          <div class="hud-card">
+            <span>HP:</span>
+            <div class="hp-bar-bg">
+              <div id="hudHpFill" class="hp-bar-fill"></div>
+            </div>
+            <span id="hudHp">100/100</span>
+          </div>
+
+          <div class="hud-card">
+            <span>⏱ <span id="hudTime">0.0s</span></span>
+            <span style="color: var(--border);">|</span>
+            <span>⭐ Score: <span id="hudScore">0</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-hint">
+        <span>Move: <span class="key-cap">W</span><span class="key-cap">A</span><span class="key-cap">S</span><span class="key-cap">D</span> / <span class="key-cap">Arrow Keys</span></span>
+        <span>Attack: <span class="key-cap">Space</span> / <span class="key-cap">Left Click</span></span>
+        <span>Objective: Reach portal <span style="color: var(--teal);">■</span> to clear level!</span>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; font-family: 'JetBrains Mono';">SYSTEM TELEMETRY LOGS</div>
+        <div id="gameLogs" style="background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem; font-family: 'JetBrains Mono'; font-size: 0.72rem; height: 80px; overflow-y: auto;">
+          <div class="log-item">[System] Initializing LLM PCG Research Server... Click "New Session" to start!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Research Telemetry & LLM Feedback Inspector -->
+    <div class="glass-panel">
+      <div class="panel-title">
+        <span>📊 Research Telemetry</span>
+        <span class="badge" style="font-size: 0.65rem;">LIVE ADAPTATION</span>
+      </div>
+
+      <div class="telemetry-list">
+        <div class="metric-row">
+          <span class="metric-label">Clear Speed:</span>
+          <span id="mTime" class="metric-val">0.0s</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Damage Taken:</span>
+          <span id="mDmg" class="metric-val" style="color: var(--danger);">0 HP</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Enemies Eliminated:</span>
+          <span id="mKills" class="metric-val">0/0</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Chests Opened:</span>
+          <span id="mChests" class="metric-val" style="color: var(--gold);">0/0</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Difficulty Rating:</span>
+          <span id="mDiff" class="metric-val" style="color: var(--accent);">50%</span>
+        </div>
+      </div>
+
+      <div class="ai-feed">
+        <div class="ai-feed-header">
+          <span>🧠 AI Director Adaptation Rationale</span>
+        </div>
+        <div id="aiRationale" class="ai-feed-body">
+          The closed-loop LLM Director will evaluate playstyle telemetry (clear speed, damage, retries) after each level and adapt PCG generation parameters for Level N+1.
+        </div>
+      </div>
+
+      <!-- Advanced Research Feature Toggles (6 to 9) -->
+      <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; margin-bottom: 1rem;">
+        <div style="font-size: 0.75rem; font-weight: 700; color: var(--teal); font-family: 'JetBrains Mono'; margin-bottom: 0.6rem;">
+          🔬 EXPERIMENTAL RESEARCH TOGGLES (6-9)
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.72rem; font-family: 'JetBrains Mono';">
+          <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+            <span>6. Emergent Playstyle Clustering</span>
+            <input type="checkbox" id="toggleF6" style="width: auto; cursor: pointer;" checked>
+          </label>
+          <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+            <span>7. Narrative-Architectural Lore</span>
+            <input type="checkbox" id="toggleF7" style="width: auto; cursor: pointer;" checked>
+          </label>
+          <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+            <span>8. Asymmetric Dual-Path PCG</span>
+            <input type="checkbox" id="toggleF8" style="width: auto; cursor: pointer;" checked>
+          </label>
+          <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+            <span>9. Dynamic Living Dungeon</span>
+            <input type="checkbox" id="toggleF9" style="width: auto; cursor: pointer;" checked>
+          </label>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: auto;">
+        <button id="btnNewPrompt" class="btn" onclick="openInitialPromptModal()">
+          🔮 START NEW PROMPT SESSION
+        </button>
+        <button class="btn btn-secondary" onclick="exportSessionData()">
+          📊 Download Paper Session JSON
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Initial Prompt Selection Modal -->
+  <div id="initialPromptModal" class="modal-overlay active">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">🔮 Create Initial Level via LLM Prompt</div>
+        <div class="badge">Session Setup</div>
+      </div>
+
+      <div style="font-size: 0.85rem; color: var(--muted);">
+        Describe your dream initial dungeon layout or choose a preset. The LLM will parse your description into PCG generation parameters:
+      </div>
+
+      <div>
+        <label style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; display: block;">QUICK UNRESTRICTED PRESETS:</label>
+        <div class="pref-options" style="grid-template-columns: repeat(3, 1fr);">
+          <button class="pref-btn active" onclick="selectInitialPreset(this, 'A dark obsidian abyss with narrow ambush corridors, deadly traps, and hidden treasure vaults')">🔥 Dark Obsidian</button>
+          <button class="pref-btn" onclick="selectInitialPreset(this, 'A bright light map with white room sanctuary and marble pillars')">⚪ Light Marble</button>
+          <button class="pref-btn" onclick="selectInitialPreset(this, 'A cyberpunk neon grid matrix with futuristic laser traps and fast enemies')">⚡ Cyberpunk Neon</button>
+          <button class="pref-btn" onclick="selectInitialPreset(this, 'A volcanic magma citadel with molten lava floors, fire traps, and intense difficulty')">🌋 Volcanic Magma</button>
+          <button class="pref-btn" onclick="selectInitialPreset(this, 'A glacial crystal vault with frozen blue ice chambers and crystal chests')">❄️ Glacial Crystal</button>
+          <button class="pref-btn" onclick="selectInitialPreset(this, 'An emerald forest sanctuary with lush green moss floors and nature hazards')">🌲 Emerald Forest</button>
+        </div>
+        <textarea id="initialPromptText" class="custom-pref" style="margin-top: 0.6rem; height: 70px;" placeholder="Describe any custom initial dungeon prompt...">A dark obsidian abyss with narrow ambush corridors, deadly traps, and hidden treasure vaults</textarea>
+
+      </div>
+
+      <div id="initialThinking" style="display: none; font-size: 0.8rem; color: var(--teal); font-family: 'JetBrains Mono'; text-align: center; padding: 0.6rem; background: rgba(6,182,212,0.1); border-radius: 8px;">
+        🤖 OpenRouter LLM parsing description & generating Level 1 map parameters...
+      </div>
+
+      <button id="btnGenerateInitial" class="btn" onclick="submitInitialPrompt()">
+        ⚡ GENERATE PROMPT-GUIDED LEVEL 1
+      </button>
+    </div>
+  </div>
+
+  <!-- Level Complete & Dual-Mode LLM Feedback Modal -->
+  <div id="levelModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">🎉 LEVEL CLEAR!</div>
+        <div class="badge" id="modalLevelBadge">Level 1 Complete</div>
+      </div>
+
+      <div style="font-size: 0.85rem; color: var(--muted);">
+        Level telemetry collected! Choose how Level N+1 should be generated:
+      </div>
+
+      <div class="telemetry-list" style="margin-bottom: 0.5rem;">
+        <div class="metric-row">
+          <span class="metric-label">Level Clear Time:</span>
+          <span id="modalTime" class="metric-val">0s</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Damage Taken:</span>
+          <span id="modalDmg" class="metric-val">0 HP</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Retries / Deaths:</span>
+          <span id="modalRetries" class="metric-val">0</span>
+        </div>
+      </div>
+
+      <!-- Mode Selector Tabs -->
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <button id="tabCustom" class="btn btn-secondary active" style="flex: 1; padding: 0.5rem; font-size: 0.78rem;" onclick="switchFeedbackTab('custom')">
+          ✍ Provide Custom Feedback
+        </button>
+        <button id="tabAuto" class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.78rem;" onclick="switchFeedbackTab('auto')">
+          🤖 Auto-Progress (AI Director)
+        </button>
+      </div>
+
+      <!-- Custom Feedback Pane -->
+      <div id="customFeedbackPane">
+        <label style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; display: block;">TARGET PREFERENCE:</label>
+        <div class="pref-options">
+          <button class="pref-btn active" onclick="selectFeedbackPref(this, 'Make the game much harder! I had it too easy!')">🔥 Make it much harder!</button>
+          <button class="pref-btn" onclick="selectFeedbackPref(this, 'Add more puzzle traps and hidden corridors')">🧩 More Traps & Corridors</button>
+          <button class="pref-btn" onclick="selectFeedbackPref(this, 'Spawn dense ambush monster hordes')">⚔ Heavy Ambush Hordes</button>
+          <button class="pref-btn" onclick="selectFeedbackPref(this, 'Casual play with higher health and chest rewards')">☕ Casual & High Chests</button>
+        </div>
+        <textarea id="customPref" class="custom-pref" style="margin-top: 0.6rem;" placeholder="Or type custom request for next level..."></textarea>
+      </div>
+
+      <!-- Auto Progress Pane -->
+      <div id="autoProgressPane" style="display: none; background: rgba(139,92,246,0.08); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; font-size: 0.8rem; color: #ddd6fe;">
+        ⚡ <strong>Autonomous AI Director Mode:</strong> The LLM will automatically evaluate your telemetry (speed, damage, deaths) alongside your original prompt to create an upgraded, tailored Level N+1 without manual input.
+      </div>
+
+      <div id="llmThinking" style="display: none; font-size: 0.8rem; color: var(--teal); font-family: 'JetBrains Mono'; text-align: center; padding: 0.6rem; background: rgba(6,182,212,0.1); border-radius: 8px;">
+        🤖 OpenRouter LLM evaluating playstyle telemetry & generating Level N+1 PCG parameters...
+      </div>
+
+      <div id="paramDiffBox" class="param-comparison" style="display: none;">
+        <div class="param-box">
+          <div style="color: var(--muted);">Level N Config</div>
+          <div id="prevConfigView">Difficulty: 0.5</div>
+        </div>
+        <div class="param-box" style="border-color: var(--accent);">
+          <div style="color: var(--accent);">Level N+1 LLM Config</div>
+          <div id="nextConfigView">Difficulty: 0.85</div>
+        </div>
+      </div>
+
+      <button id="btnNextLevel" class="btn" onclick="submitFeedbackNextLevel()">
+        🚀 Generate Upgraded Next Level via LLM
+      </button>
+    </div>
+  </div>
+
+  <script src="/static/game.js"></script>
+  <script>
+    let game = null;
+    let selectedInitialPrompt = "A dark obsidian abyss with narrow ambush corridors, deadly traps, and hidden treasure vaults";
+    let selectedFeedbackPreference = "Make the game much harder! I had it too easy!";
+    let currentFeedbackMode = "custom";
+
+    window.addEventListener('DOMContentLoaded', () => {
+      game = new GameEngine('gameCanvas');
+      game.startLoop();
+      submitInitialPrompt();
+    });
+
+
+    function toggleAudio() {
+      if (!game) return;
+      game.sfx.muted = !game.sfx.muted;
+      const btn = document.getElementById('muteBtn');
+      btn.textContent = game.sfx.muted ? '🔇 Audio: OFF' : '🔊 Audio: ON';
+    }
+
+    function openInitialPromptModal() {
+      document.getElementById('initialPromptModal').classList.add('active');
+    }
+
+    function selectInitialPreset(btn, text) {
+      document.querySelectorAll('#initialPromptModal .pref-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedInitialPrompt = text;
+      document.getElementById('initialPromptText').value = text;
+    }
+
+    async function submitInitialPrompt() {
+      const promptText = document.getElementById('initialPromptText').value.trim() || selectedInitialPrompt;
+      const thinking = document.getElementById('initialThinking');
+      const btn = document.getElementById('btnGenerateInitial');
+
+      thinking.style.display = 'block';
+      btn.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/prompt_initial_level', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: promptText })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          game.levelNumber = 1;
+          game.loadMap(data.map);
+          document.getElementById('initialPromptModal').classList.remove('active');
+          game.addLog(`✨ Level 1 Generated by Prompt: "${promptText.substring(0, 35)}..."`);
+        }
+      } catch (e) {
+        alert('Error parsing initial prompt: ' + e.message);
+      } finally {
+        thinking.style.display = 'none';
+        btn.style.display = 'block';
+      }
+    }
+
+    function switchFeedbackTab(mode) {
+      currentFeedbackMode = mode;
+      document.getElementById('tabCustom').classList.toggle('active', mode === 'custom');
+      document.getElementById('tabAuto').classList.toggle('active', mode === 'auto');
+      document.getElementById('customFeedbackPane').style.display = mode === 'custom' ? 'block' : 'none';
+      document.getElementById('autoProgressPane').style.display = mode === 'auto' ? 'block' : 'none';
+    }
+
+    function selectFeedbackPref(btn, text) {
+      document.querySelectorAll('#customFeedbackPane .pref-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedFeedbackPreference = text;
+      document.getElementById('customPref').value = '';
+    }
+
+    window.showLevelCompleteModal = function(levelNum, telemetry, currentConfig) {
+      document.getElementById('modalLevelBadge').textContent = `Level ${levelNum} Complete`;
+      document.getElementById('modalTime').textContent = `${telemetry.time_taken_sec.toFixed(1)}s`;
+      document.getElementById('modalDmg').textContent = `${telemetry.damage_taken} HP`;
+      document.getElementById('modalRetries').textContent = telemetry.deaths_retries;
+
+      document.getElementById('llmThinking').style.display = 'none';
+      document.getElementById('paramDiffBox').style.display = 'none';
+      document.getElementById('btnNextLevel').style.display = 'block';
+
+      document.getElementById('levelModal').classList.add('active');
+    };
+
+    async function submitFeedbackNextLevel() {
+      let prefText = "";
+      if (currentFeedbackMode === 'custom') {
+        const customText = document.getElementById('customPref').value.trim();
+        prefText = customText || selectedFeedbackPreference;
+      } else {
+        prefText = "AUTO-PROGRESS: Autonomous AI Director playstyle evaluation and progression upgrade.";
+      }
+
+      const thinking = document.getElementById('llmThinking');
+      const btn = document.getElementById('btnNextLevel');
+      thinking.style.display = 'block';
+      btn.style.display = 'none';
+
+      try {
+        const payload = {
+          session_id: game.sessionId,
+          level_number: game.levelNumber,
+          telemetry: game.telemetry,
+          user_preference: prefText,
+          current_config: game.currentConfig,
+          research_toggles: {
+            f6_clustering: document.getElementById('toggleF6').checked,
+            f7_isomorphism: document.getElementById('toggleF7').checked,
+            f8_dual_path: document.getElementById('toggleF8').checked,
+            f9_living_dungeon: document.getElementById('toggleF9').checked
+          }
+        };
+
+
+        const res = await fetch('/api/feedback_next_level', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.status === 'success') {
+          const evalResult = data.llm_eval;
+          document.getElementById('aiRationale').textContent = 
+            `[${evalResult.playstyle_assessment || 'Assessment'}] ${evalResult.adaptation_rationale}`;
+
+          document.getElementById('prevConfigView').innerHTML = formatConfig(game.currentConfig);
+          document.getElementById('nextConfigView').innerHTML = formatConfig(data.next_config);
+          document.getElementById('paramDiffBox').style.display = 'grid';
+
+          game.levelNumber += 1;
+          setTimeout(() => {
+            document.getElementById('levelModal').classList.remove('active');
+            game.loadMap(data.next_map);
+            game.addLog(`🚀 Upgraded Level ${game.levelNumber} Generated by LLM Feedback Loop!`);
+          }, 2000);
+        }
+      } catch (e) {
+        alert('Error sending feedback to LLM: ' + e.message);
+        btn.style.display = 'block';
+        thinking.style.display = 'none';
+      }
+    }
+
+    function formatConfig(cfg) {
+      if (!cfg) return '';
+      return `Diff: ${(cfg.difficulty*100).toFixed(0)}%<br>` +
+             `Enemies: ${cfg.enemy_type} (${(cfg.enemy_density*100).toFixed(0)}%)<br>` +
+             `Traps: ${(cfg.trap_probability*100).toFixed(0)}%<br>` +
+             `Visibility: ${cfg.visibility}`;
+    }
+
+    async function exportSessionData() {
+      try {
+        const res = await fetch('/api/export_session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: game.sessionId })
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          const jsonStr = JSON.stringify(data.history, null, 2);
+          const blob = new Blob([jsonStr], { type: 'application/json' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `${game.sessionId}_research_telemetry.json`;
+          a.click();
+          game.addLog('📥 Exported research session JSON dataset!');
+        } else {
+          alert('No session data recorded yet. Play a level first!');
+        }
+      } catch (e) {
+        alert('Error exporting session: ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>

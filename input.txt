@@ -1,0 +1,14 @@
+
+{
+  "theme": "dark",
+  "layout_style": "room-heavy",
+  "corridor_width": 2,
+  "room_density": 0.7,
+  "enemy_density": 0.5,
+  "enemy_type": "patrol",
+  "difficulty": 0.6,
+  "trap_probability": 0.3,
+  "visibility": "low",
+  "reward_density": 0.4
+}
+
