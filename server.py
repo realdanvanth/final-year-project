@@ -7,6 +7,7 @@ import subprocess
 import urllib.request
 import urllib.error
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from evolutionary_engine import MAPElitesArchive, DEFAULT_GENOME
 
 import csv
 os.environ["MPLCONFIGDIR"] = "/tmp/matplotlib"
@@ -29,7 +30,19 @@ os.makedirs(SESSIONS_DIR, exist_ok=True)
 os.makedirs(ANALYTICS_DIR, exist_ok=True)
 os.makedirs(PLOTS_DIR, exist_ok=True)
 
-def append_to_csv_logs(session_id, level_num, telemetry, prev_config, next_config, llm_eval):
+# In-memory sessions archives
+ACTIVE_ARCHIVES = {}
+
+def get_or_create_archive(session_id, fitness_fn="default_flow", behavior_fn="default_expl_agg"):
+    if session_id not in ACTIVE_ARCHIVES:
+        ACTIVE_ARCHIVES[session_id] = MAPElitesArchive(
+            grid_size=10,
+            fitness_fn_name=fitness_fn,
+            behavior_fn_name=behavior_fn
+        )
+    return ACTIVE_ARCHIVES[session_id]
+
+def append_to_csv_logs(session_id, level_num, telemetry, prev_config, next_config, llm_eval, eval_record=None, archive_stats=None):
     telemetry_csv = os.path.join(ANALYTICS_DIR, "session_telemetry.csv")
     llm_csv = os.path.join(ANALYTICS_DIR, "llm_parameters_history.csv")
 
@@ -41,8 +54,10 @@ def append_to_csv_logs(session_id, level_num, telemetry, prev_config, next_confi
                 "Session_ID", "Level_Number", "Timestamp", "Clear_Time_Sec",
                 "Damage_Taken", "Health_Remaining", "Deaths_Retries",
                 "Enemies_Killed", "Total_Enemies", "Chests_Opened", "Total_Chests",
-                "Traps_Triggered", "Exploration_Percent", "Playstyle_Assessment"
+                "Traps_Triggered", "Exploration_Percent", "MAP_Elites_Fitness", "Archive_Coverage_Pct"
             ])
+        fit_val = f"{eval_record['fitness']:.4f}" if eval_record else "N/A"
+        cov_val = f"{archive_stats['coverage_percent']:.1f}" if archive_stats else "N/A"
         writer.writerow([
             session_id, level_num, time.strftime("%Y-%m-%d %H:%M:%S"),
             f"{telemetry.get('time_taken_sec', 0):.2f}",
@@ -55,7 +70,8 @@ def append_to_csv_logs(session_id, level_num, telemetry, prev_config, next_confi
             telemetry.get('total_chests', 0),
             telemetry.get('traps_triggered', 0),
             f"{telemetry.get('exploration_percent', 0):.1f}",
-            llm_eval.get("playstyle_assessment", "N/A")
+            fit_val,
+            cov_val
         ])
 
     write_llm_header = not os.path.exists(llm_csv)
@@ -81,7 +97,7 @@ def append_to_csv_logs(session_id, level_num, telemetry, prev_config, next_confi
             f"{next_config.get('trap_probability', 0.15):.2f}",
             next_config.get("visibility", "normal"),
             f"{next_config.get('reward_density', 0.15):.2f}",
-            llm_eval.get("llm_model_used", "Rule Engine"),
+            "MAP-Elites EA + OpenRouter (Lore Only)",
             str(llm_eval.get("adaptation_rationale", "N/A")).replace("\n", " ")
         ])
 
@@ -100,80 +116,36 @@ def generate_session_matplotlib_plots(session_id=""):
                     enemy_density = [entry.get("next_config", {}).get("enemy_density", 0.2) for entry in history]
                     trap_prob = [entry.get("next_config", {}).get("trap_probability", 0.15) for entry in history]
 
-                    clear_time = [entry.get("telemetry", {}).get("time_taken_sec", 0) for entry in history]
-                    damage_taken = [entry.get("telemetry", {}).get("damage_taken", 0) for entry in history]
+                    fitness_scores = [entry.get("eval_record", {}).get("fitness", 0.5) for entry in history]
 
-                    # 1. Parameter Evolution Line Chart
-                    fig, ax = plt.subplots(figsize=(8, 4.5), dpi=150)
-                    fig.patch.set_facecolor('#090a0f')
-                    ax.set_facecolor('#121624')
-                    ax.plot(levels, difficulty, marker='o', color='#8b5cf6', label='Difficulty', linewidth=2.5)
-                    ax.plot(levels, room_density, marker='s', color='#06b6d4', label='Room Density', linewidth=2)
-                    ax.plot(levels, enemy_density, marker='^', color='#f43f5e', label='Enemy Density', linewidth=2)
-                    ax.plot(levels, trap_prob, marker='d', color='#f59e0b', label='Trap Probability', linewidth=2)
+                    # Plot 1: Genome Evolution & Fitness Plot
+                    fig, ax1 = plt.subplots(figsize=(8, 4.5), dpi=100)
+                    ax1.set_facecolor('#0f172a')
+                    fig.patch.set_facecolor('#0b0f19')
 
-                    ax.set_title(f'PCG Parameter Evolution — Session {session_id}', color='#f1f5f9', fontsize=11, fontweight='bold')
-                    ax.set_xlabel('Level Generation', color='#94a3b8')
-                    ax.set_ylabel('Parameter Value (0.0 - 1.0)', color='#94a3b8')
-                    ax.tick_params(colors='#94a3b8')
-                    ax.grid(True, color='#334155', linestyle='--')
-                    ax.legend(facecolor='#090a0f', edgecolor='#94a3b8', labelcolor='#f1f5f9')
+                    ax1.plot(levels, difficulty, label="Difficulty", color="#38bdf8", marker="o", linewidth=2)
+                    ax1.plot(levels, room_density, label="Room Density", color="#a855f7", marker="s", linewidth=2)
+                    ax1.plot(levels, enemy_density, label="Enemy Density", color="#f43f5e", marker="^", linewidth=2)
+                    ax1.plot(levels, trap_prob, label="Trap Prob", color="#eab308", marker="d", linewidth=2)
+                    ax1.plot(levels, fitness_scores, label="MAP-Elites Fitness", color="#10b981", marker="*", linewidth=3, linestyle="--")
 
-                    plt.tight_layout()
-                    plot_file1 = f"plot_parameter_evolution_{session_id}.png"
-                    plt.savefig(os.path.join(PLOTS_DIR, plot_file1), facecolor=fig.get_facecolor())
-                    plt.close()
-                    saved_plots.append(plot_file1)
-
-                    # 2. Player Performance Bar Chart
-                    fig, ax1 = plt.subplots(figsize=(8, 4.5), dpi=150)
-                    fig.patch.set_facecolor('#090a0f')
-                    ax1.set_facecolor('#121624')
-
-                    x_indices = list(range(len(levels)))
-                    width = 0.35
-                    ax1.bar([i - width/2 for i in x_indices], clear_time, width, label='Clear Time (s)', color='#06b6d4')
-                    ax1.bar([i + width/2 for i in x_indices], damage_taken, width, label='Damage Taken (HP)', color='#ef4444')
-
-                    ax1.set_title(f'Player Performance Metrics — Session {session_id}', color='#f1f5f9', fontsize=11, fontweight='bold')
-                    ax1.set_xlabel('Level Generation', color='#94a3b8')
-                    ax1.set_ylabel('Time (s) / Damage (HP)', color='#94a3b8')
-                    ax1.set_xticks(x_indices)
-                    ax1.set_xticklabels([f"Lvl {l}" for l in levels], color='#94a3b8')
-                    ax1.tick_params(colors='#94a3b8')
-                    ax1.grid(True, color='#334155', linestyle='--')
-                    ax1.legend(facecolor='#090a0f', edgecolor='#94a3b8', labelcolor='#f1f5f9')
+                    ax1.set_title(f"MAP-Elites Genome & Fitness Evolution (Session: {session_id[:12]})", color="#f8fafc", fontsize=11, fontweight="bold")
+                    ax1.set_xlabel("Level Number", color="#94a3b8", fontsize=9)
+                    ax1.set_ylabel("Parameter Scale / Fitness [0-1]", color="#94a3b8", fontsize=9)
+                    ax1.tick_params(colors="#94a3b8")
+                    ax1.grid(True, linestyle=":", alpha=0.3, color="#334155")
+                    ax1.legend(facecolor="#1e293b", edgecolor="#334155", labelcolor="#f8fafc", fontsize=8)
 
                     plt.tight_layout()
-                    plot_file2 = f"plot_player_performance_{session_id}.png"
-                    plt.savefig(os.path.join(PLOTS_DIR, plot_file2), facecolor=fig.get_facecolor())
+                    plot_filename1 = f"plot_parameter_evolution_{session_id}.png"
+                    plot_path1 = os.path.join(PLOTS_DIR, plot_filename1)
+                    plt.savefig(plot_path1)
                     plt.close()
-                    saved_plots.append(plot_file2)
+                    saved_plots.append(plot_filename1)
+
             except Exception as e:
-                print("Error reading session history for plots:", e)
-
-    # Always scan PLOTS_DIR for all available plot PNG files
-    if os.path.exists(PLOTS_DIR):
-        for fname in sorted(os.listdir(PLOTS_DIR)):
-            if fname.endswith(".png") and fname not in saved_plots:
-                saved_plots.append(fname)
-
+                print(f"Error generating matplotlib plot for {session_id}: {e}")
     return saved_plots
-
-
-
-DEFAULT_CONFIG = {
-    "theme": "dark",
-    "layout_style": "balanced",
-    "corridor_width": 2,
-    "room_density": 0.5,
-    "enemy_density": 0.2,
-    "enemy_type": "patrol",
-    "difficulty": 0.5,
-    "trap_probability": 0.15,
-    "visibility": "normal",
-    "reward_density": 0.15
-}
 
 def ensure_binary():
     if not os.path.exists(DUNGEON_BIN):
@@ -192,18 +164,14 @@ def run_pcg_generator(config):
     with open(tmp_input, "w") as f:
         json.dump(config, f, indent=2)
 
-    # Generate JSON
     subprocess.run([DUNGEON_BIN, tmp_input, tmp_output, "--export-json"], check=True)
-    # Generate PNG
     subprocess.run([DUNGEON_BIN, tmp_input, tmp_png], check=True)
 
     with open(tmp_output, "r") as f:
         map_json = json.load(f)
 
-    # Inject dynamic full config (palette, theme_name, dimensions)
     map_json["config"] = config
     return map_json
-
 
 def create_dynamic_palette(user_prompt):
     p = user_prompt.lower()
@@ -279,62 +247,6 @@ def create_dynamic_palette(user_prompt):
                 "fog": "#011c15"
             }
         }
-
-    elif any(k in p for k in ["castle", "fortress", "citadel", "palace", "gothic", "keep", "throne"]):
-        return {
-            "theme_name": "Ancient Royal Citadel",
-            "theme": "dark",
-            "palette": {
-                "background": "#1e1b4b",
-                "wall": "#312e81",
-                "floor": "#4338ca",
-                "corridor": "#3730a3",
-                "door": "#fbbf24",
-                "trap": "#ef4444",
-                "enemy": "#e11d48",
-                "chest": "#f59e0b",
-                "start": "#10b981",
-                "exit": "#06b6d4",
-                "fog": "#0f172a"
-            }
-        }
-    elif any(k in p for k in ["dragon", "cave", "lair", "wyrm", "beast", "cavern"]):
-        return {
-            "theme_name": "Ancient Dragon Cave",
-            "theme": "dark",
-            "palette": {
-                "background": "#1c1917",
-                "wall": "#44403c",
-                "floor": "#78350f",
-                "corridor": "#57534e",
-                "door": "#ea580c",
-                "trap": "#dc2626",
-                "enemy": "#b91c1c",
-                "chest": "#fbbf24",
-                "start": "#10b981",
-                "exit": "#06b6d4",
-                "fog": "#0c0a09"
-            }
-        }
-    elif any(k in p for k in ["light", "white", "bright", "marble", "sun", "day", "ivory"]):
-
-        return {
-            "theme_name": "Light Marble Sanctuary",
-            "theme": "light",
-            "palette": {
-                "background": "#f8fafc",
-                "wall": "#cbd5e1",
-                "floor": "#ffffff",
-                "corridor": "#f1f5f9",
-                "door": "#7c3aed",
-                "trap": "#dc2626",
-                "enemy": "#e11d48",
-                "chest": "#d97706",
-                "start": "#059669",
-                "exit": "#0891b2",
-                "fog": "#94a3b8"
-            }
-        }
     else:
         return {
             "theme_name": "Dark Obsidian Abyss",
@@ -358,50 +270,28 @@ def parse_initial_prompt_to_config(user_prompt):
     models = [
         "deepseek/deepseek-chat",
         "meta-llama/llama-3.1-70b-instruct",
-        "qwen/qwen-2.5-72b-instruct",
-        "mistralai/mistral-small-24b-instruct-2501"
+        "qwen/qwen-2.5-72b-instruct"
     ]
 
-
     sys_content = f"""You are a dynamic dungeon configuration generator for an unconstrained closed-loop PCG game engine.
-Rules:
-- Output ONLY raw JSON
-- No markdown
-- No explanation
-- No duplicate keys
-
-Schema:
+Output ONLY raw JSON matching schema:
 {{
   "theme_name": "<Descriptive theme name>",
   "theme": "dark" | "light",
-  "palette": {{
-    "background": "#HEX",
-    "wall": "#HEX",
-    "floor": "#HEX",
-    "corridor": "#HEX",
-    "door": "#HEX",
-    "trap": "#HEX",
-    "enemy": "#HEX",
-    "chest": "#HEX",
-    "start": "#HEX",
-    "exit": "#HEX",
-    "fog": "#HEX"
-  }},
+  "palette": {{ "background": "#HEX", "wall": "#HEX", "floor": "#HEX", "corridor": "#HEX", "door": "#HEX", "trap": "#HEX", "enemy": "#HEX", "chest": "#HEX", "start": "#HEX", "exit": "#HEX", "fog": "#HEX" }},
   "map_width": 40-100,
   "map_height": 40-100,
-  "layout_style": "corridor-heavy" | "room-heavy" | "balanced" | "arena" | "labyrinth",
-  "corridor_width": 1-4,
-  "room_density": 0.1-0.95,
-  "enemy_density": 0.05-0.6,
-  "enemy_type": "ambush" | "patrol" | "roaming" | "horde",
+  "layout_style": "corridor-heavy" | "room-heavy" | "balanced",
+  "corridor_width": 1-3,
+  "room_density": 0.1-0.9,
+  "enemy_density": 0.05-0.5,
+  "enemy_type": "ambush" | "patrol",
   "difficulty": 0.0-1.0,
-  "trap_probability": 0.0-0.6,
-  "visibility": "low" | "normal" | "high",
-  "reward_density": 0.05-0.5
+  "trap_probability": 0.0-0.5,
+  "visibility": "low" | "normal",
+  "reward_density": 0.05-0.4
 }}
-
-Generate dynamic dungeon parameters matching this player description:
-"{user_prompt}"
+Prompt: "{user_prompt}"
 """
 
     for m in models:
@@ -411,7 +301,7 @@ Generate dynamic dungeon parameters matching this player description:
                 data=json.dumps({"model": m, "messages": [{"role": "user", "content": sys_content}]}).encode("utf-8"),
                 headers={"Content-Type": "application/json", "Authorization": f"Bearer {OPENROUTER_API_KEY}"}
             )
-            with urllib.request.urlopen(req, timeout=3) as response:
+            with urllib.request.urlopen(req, timeout=8) as response:
                 res_data = json.loads(response.read().decode("utf-8"))
                 content = res_data["choices"][0]["message"]["content"]
                 cleaned = content.replace("```json", "").replace("```", "").strip()
@@ -427,162 +317,40 @@ Generate dynamic dungeon parameters matching this player description:
             print(f"Initial prompt parsing with model {m} failed: {e}")
 
     p = user_prompt.lower()
-    cfg = dict(DEFAULT_CONFIG)
+    cfg = dict(DEFAULT_GENOME)
     dynamic_palette = create_dynamic_palette(user_prompt)
     cfg["theme_name"] = dynamic_palette["theme_name"]
     cfg["theme"] = dynamic_palette["theme"]
     cfg["palette"] = dynamic_palette["palette"]
-
-
-    if any(k in p for k in ["huge", "mega", "large", "giant", "massive"]):
-        cfg["map_width"] = 80
-        cfg["map_height"] = 80
-    elif any(k in p for k in ["tiny", "small", "micro", "compact"]):
-        cfg["map_width"] = 35
-        cfg["map_height"] = 35
-
-    if "hard" in p or "deadly" in p or "abyss" in p or "boss" in p:
-        cfg["difficulty"] = 0.75
-        cfg["enemy_density"] = 0.3
-        cfg["enemy_type"] = "ambush"
-        cfg["trap_probability"] = 0.25
-    elif "easy" in p or "relax" in p or "treasure" in p:
-        cfg["difficulty"] = 0.35
-        cfg["enemy_density"] = 0.12
-        cfg["reward_density"] = 0.25
-        cfg["visibility"] = "normal"
-
-    if "dark" in p or "fog" in p or "shadow" in p:
-        cfg["visibility"] = "low"
-    if "room" in p or "vault" in p:
-        cfg["layout_style"] = "room-heavy"
-        cfg["room_density"] = 0.75
-    elif "corridor" in p or "maze" in p:
-        cfg["layout_style"] = "corridor-heavy"
-        cfg["corridor_width"] = 1
-
     return cfg
 
-
-def compute_emergent_archetype(telemetry):
-    time_taken = telemetry.get('time_taken_sec', 30)
-    damage = telemetry.get('damage_taken', 0)
-    chests = telemetry.get('chests_opened', 0)
-    total_chests = max(1, telemetry.get('total_chests', 1))
-    kills = telemetry.get('enemies_killed', 0)
-    total_enemies = max(1, telemetry.get('total_enemies', 1))
-    traps = telemetry.get('traps_triggered', 0)
-
-    chest_ratio = chests / total_chests
-    kill_ratio = kills / total_enemies
-
-    if time_taken < 25 and damage < 20 and kill_ratio > 0.8:
-        return "Cluster Alpha: Blitz Krieger (Ultra-Fast Clear, High Combat Efficiency)"
-    elif chest_ratio >= 0.8 and damage < 25 and time_taken >= 40:
-        return "Cluster Beta: Cautious Hoarder (100% Exploration & Resource Collection)"
-    elif traps > 1 or damage > 50:
-        return "Cluster Gamma: Panic Striker (High Hesitation, Hazard Volatility)"
-    else:
-        return "Cluster Delta: Methodical Sentry (Balanced Tactical Navigation)"
-
-def generate_narrative_isomorphism(level_num):
-    narratives = [
-        {"title": "Act I: The Forgotten Sanctum", "lore": "An ancient stone vault intact with sacred protective wards.", "degrade_factor": 0.0, "theme": "dark"},
-        {"title": "Act II: The Corrupted Abyss", "lore": "Dark void magic erodes the sanctuary pillars, spawning dimensional rifts.", "degrade_factor": 0.25, "theme": "dark"},
-        {"title": "Act III: The Blood Magma Core", "lore": "Molten lava breaches the lower chambers as architectural stability collapses.", "degrade_factor": 0.5, "theme": "dark"},
-        {"title": "Act IV: The Void Citadel", "lore": "Total reality collapse. Corridors morph into spatial anomaly traps.", "degrade_factor": 0.75, "theme": "dark"}
-    ]
-    idx = min(len(narratives) - 1, level_num - 1)
-    return narratives[idx]
-
-def apply_living_dungeon_reaction(telemetry, cfg):
-    time_taken = telemetry.get('time_taken_sec', 30)
-    damage = telemetry.get('damage_taken', 0)
-    kills = telemetry.get('enemies_killed', 0)
-
-    reaction_log = ""
-    if kills >= 5 and time_taken < 35:
-        cfg["enemy_type"] = "ambush"
-        cfg["corridor_width"] = 1
-        reaction_log = "Dungeon reacted defensively to aggressive melee rush by reinforcing corridor chokepoints and ambush traps."
-    elif time_taken > 50:
-        cfg["enemy_type"] = "roaming"
-        cfg["room_density"] = min(0.85, cfg.get("room_density", 0.5) + 0.1)
-        reaction_log = "Dungeon expanded room networks to challenge cautious exploration."
-    else:
-        reaction_log = "Dungeon dynamically recalibrated enemy patrol routes."
-
-    return cfg, reaction_log
-
-def query_llm_feedback(telemetry, user_pref, current_config, level_num, research_toggles=None):
-
-
+def query_llm_narrative_only(level_num, archive_stats, eval_record):
     models = [
         "deepseek/deepseek-chat",
         "meta-llama/llama-3.1-70b-instruct",
-        "qwen/qwen-2.5-72b-instruct",
-        "mistralai/mistral-small-24b-instruct-2501"
+        "qwen/qwen-2.5-72b-instruct"
     ]
 
+    prompt = f"""You are a dark fantasy dungeon chronicler.
+Generate lore for Level {level_num} based on the dungeon's MAP-Elites evolutionary state:
+- Archive Coverage: {archive_stats['coverage_percent']}% ({archive_stats['filled_cells']}/100 niches discovered)
+- Level Fitness Score: {eval_record['fitness']} (Target: Flow State)
+- Player Niche: {eval_record['behavior']['dim1_name']}={eval_record['behavior']['dim1_val']}, {eval_record['behavior']['dim2_name']}={eval_record['behavior']['dim2_val']}
 
-
-    user_prompt = f"""You are an expert AI Dungeon Master & Closed-Loop PCG Research Director.
-
-Player Performance Telemetry for Level {level_num}:
-- Clear Time: {telemetry.get('time_taken_sec', 0):.1f} seconds
-- Segment Times: {telemetry.get('segment_times', [])}
-- Damage Taken: {telemetry.get('damage_taken', 0)} HP
-- Health Remaining: {telemetry.get('health_remaining', 100)} HP
-- Deaths / Retries: {telemetry.get('deaths_retries', 0)}
-- Enemies Killed: {telemetry.get('enemies_killed', 0)} / {telemetry.get('total_enemies', 0)}
-- Chests Opened: {telemetry.get('chests_opened', 0)} / {telemetry.get('total_chests', 0)}
-- Traps Triggered: {telemetry.get('traps_triggered', 0)}
-- Exploration %: {telemetry.get('exploration_percent', 0):.1f}%
-
-User Target Preference: "{user_pref}"
-
-Current Level PCG Config:
-{json.dumps(current_config, indent=2)}
-
-Task:
-Analyze the player's playstyle and skill rating based on the telemetry and user request.
-If the player cleared the level quickly with minimal damage, but wants a harder game (or balanced), make the next level SUBSTANTIALLY harder (higher difficulty, ambush enemies, higher enemy_density, narrower corridors, low visibility, more traps).
-If the player died repeatedly or struggled, balance difficulty to avoid frustration while keeping the challenge engaging.
-
-Return ONLY raw JSON in this EXACT structure (no markdown, no code blocks):
+Return ONLY raw JSON:
 {{
-  "playstyle_assessment": "<Brief assessment of player, e.g., 'Aggressive Speedrunner' or 'Cautious Explorer' or 'Struggling Fighter'>",
-  "adaptation_rationale": "<2-3 sentence AI Director explanation of why parameters were changed based on metrics and user request>",
-  "next_config": {{
-    "theme": "dark",
-    "layout_style": "room-heavy" | "corridor-heavy" | "balanced",
-    "corridor_width": 1-3,
-    "room_density": 0.1-0.9,
-    "enemy_density": 0.05-0.5,
-    "enemy_type": "ambush" | "patrol" | "roaming",
-    "difficulty": 0.0-1.0,
-    "trap_probability": 0.0-0.5,
-    "visibility": "low" | "normal",
-    "reward_density": 0.05-0.4
-  }}
+  "title": "<Act/Chapter Title>",
+  "lore": "<2-3 sentence lore story matching evolutionary progression>"
 }}
 """
-
     for m in models:
-        prompt_payload = {
-            "model": m,
-            "messages": [{"role": "user", "content": user_prompt}]
-        }
         try:
             req = urllib.request.Request(
                 "https://openrouter.ai/api/v1/chat/completions",
-                data=json.dumps(prompt_payload).encode("utf-8"),
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {OPENROUTER_API_KEY}"
-                }
+                data=json.dumps({"model": m, "messages": [{"role": "user", "content": prompt}]}).encode("utf-8"),
+                headers={"Content-Type": "application/json", "Authorization": f"Bearer {OPENROUTER_API_KEY}"}
             )
-            with urllib.request.urlopen(req, timeout=8) as response:
+            with urllib.request.urlopen(req, timeout=6) as response:
                 res_data = json.loads(response.read().decode("utf-8"))
                 content = res_data["choices"][0]["message"]["content"]
                 cleaned = content.replace("```json", "").replace("```", "").strip()
@@ -590,75 +358,14 @@ Return ONLY raw JSON in this EXACT structure (no markdown, no code blocks):
                 end_idx = cleaned.rfind("}")
                 if start_idx != -1 and end_idx != -1:
                     cleaned = cleaned[start_idx:end_idx+1]
-                parsed = json.loads(cleaned)
-                if "next_config" in parsed:
-                    print(f"✅ OpenRouter model ({m}) successfully evaluated feedback!")
-                    parsed["llm_model_used"] = m
-                    parsed["user_prompt_given"] = user_prompt
-                    parsed["llm_raw_response"] = content
-                    return parsed
+                return json.loads(cleaned)
         except Exception as e:
-            print(f"Model {m} call failed: {e}")
-
-    print("Falling back to Heuristic Feedback Rule Engine...")
-    res = fallback_heuristic_feedback(telemetry, user_pref, current_config)
-    res["user_prompt_given"] = user_prompt
-    return res
-
-
-def fallback_heuristic_feedback(telemetry, user_pref, current_config):
-    cfg = dict(current_config) if current_config else dict(DEFAULT_CONFIG)
-    time_taken = telemetry.get('time_taken_sec', 30)
-
-    damage = telemetry.get('damage_taken', 0)
-    deaths = telemetry.get('deaths_retries', 0)
-    user_p = user_pref.lower()
-
-    diff_delta = 0.0
-    rationale_parts = []
-
-    if "hard" in user_p:
-        if deaths == 0 and damage < 30 and time_taken < 40:
-            diff_delta += 0.25
-            cfg["enemy_type"] = "ambush"
-            cfg["visibility"] = "low"
-            cfg["corridor_width"] = max(1, cfg.get("corridor_width", 2) - 1)
-            rationale_parts.append("Player completed previous level effortlessly with minimal damage. Elevating difficulty significantly and enabling ambush AI with reduced visibility.")
-        else:
-            diff_delta += 0.15
-            rationale_parts.append("Increasing difficulty per user request while balancing enemy pressure.")
-    elif "easy" in user_p or "casual" in user_p:
-        diff_delta -= 0.15
-        cfg["visibility"] = "normal"
-        cfg["reward_density"] = min(0.4, cfg.get("reward_density", 0.15) + 0.1)
-        rationale_parts.append("Easing difficulty and increasing reward chests per user request.")
-    else: # Balanced / Default
-        if deaths > 0 or damage > 60:
-            diff_delta -= 0.1
-            rationale_parts.append("Slightly easing combat pressure to prevent player exhaustion.")
-        elif time_taken < 35 and damage < 15:
-            diff_delta += 0.15
-            rationale_parts.append("Player demonstrated high skill speed. Scaling up difficulty and enemy density.")
-
-    cfg["difficulty"] = max(0.1, min(1.0, cfg.get("difficulty", 0.5) + diff_delta))
-    cfg["enemy_density"] = max(0.05, min(0.45, cfg["difficulty"] * 0.4))
-    cfg["trap_probability"] = max(0.05, min(0.4, cfg["difficulty"] * 0.35))
-    cfg["room_density"] = max(0.3, min(0.8, cfg.get("room_density", 0.5) + (0.05 if diff_delta > 0 else -0.05)))
-
-    assessment = "High Skill Speedrunner" if time_taken < 30 and damage < 20 else ("Cautious Explorer" if time_taken > 60 else "Balanced Combatant")
+            print(f"Narrative LLM call with model {m} failed: {e}")
 
     return {
-        "playstyle_assessment": assessment,
-        "adaptation_rationale": " ".join(rationale_parts) or "Adapted PCG parameters based on clear speed and damage metrics.",
-        "next_config": cfg,
-        "llm_model_used": "Deterministic Rule Engine (Offline Fallback)",
-        "llm_raw_response": json.dumps({
-            "playstyle_assessment": assessment,
-            "adaptation_rationale": " ".join(rationale_parts) or "Adapted PCG parameters based on clear speed and damage metrics.",
-            "next_config": cfg
-        }, indent=2)
+        "title": f"Act {level_num}: Evolutionary Chamber {archive_stats['filled_cells']}",
+        "lore": f"The dungeon morphs continuously. MAP-Elites archive coverage has reached {archive_stats['coverage_percent']}%, reshaping layout DNA to adapt to your exploration pattern."
     }
-
 
 class DungeonServerHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -691,15 +398,14 @@ class DungeonServerHandler(BaseHTTPRequestHandler):
                 content_type = "image/png"
             else:
                 content_type = "text/plain"
+        elif url_path.startswith("/research_analytics/plots/"):
+            rel = url_path.replace("/research_analytics/plots/", "")
+            file_path = os.path.join(PLOTS_DIR, rel)
+            content_type = "image/png"
         elif url_path.startswith("/research_analytics/"):
             rel = url_path.replace("/research_analytics/", "")
             file_path = os.path.join(ANALYTICS_DIR, rel)
-            if file_path.endswith(".png"):
-                content_type = "image/png"
-            elif file_path.endswith(".csv"):
-                content_type = "text/csv"
-            else:
-                content_type = "text/plain"
+            content_type = "text/csv"
         elif url_path == "/tmp_map.png":
             file_path = os.path.join(BASE_DIR, "tmp_map.png")
             content_type = "image/png"
@@ -727,7 +433,6 @@ class DungeonServerHandler(BaseHTTPRequestHandler):
             print("Error parsing POST body:", err)
             req_json = {}
 
-
         if self.path == "/api/prompt_initial_level":
             prompt = req_json.get("prompt", "Balanced dungeon crawler map")
             parsed_config = parse_initial_prompt_to_config(prompt)
@@ -739,50 +444,49 @@ class DungeonServerHandler(BaseHTTPRequestHandler):
             })
 
         elif self.path == "/api/initial_level":
-            config = req_json.get("config") or DEFAULT_CONFIG
+            config = req_json.get("config") or DEFAULT_GENOME
             map_data = run_pcg_generator(config)
             self.send_json_response({"status": "success", "map": map_data})
 
         elif self.path == "/api/feedback_next_level":
             telemetry = req_json.get("telemetry", {})
             user_pref = req_json.get("user_preference", "Balanced challenge")
-            current_config = req_json.get("current_config", DEFAULT_CONFIG)
+            current_config = req_json.get("current_config", DEFAULT_GENOME)
             level_num = req_json.get("level_number", 1)
             session_id = req_json.get("session_id", f"session_{int(time.time())}")
-            toggles = req_json.get("research_toggles", {})
+            fitness_fn_name = req_json.get("fitness_fn_name", "default_flow")
+            behavior_fn_name = req_json.get("behavior_fn_name", "default_expl_agg")
 
-            # 1. Base LLM / Rule evaluation
-            llm_result = query_llm_feedback(telemetry, user_pref, current_config, level_num)
-            next_config = dict(llm_result.get("next_config", current_config))
+            # 1. MAP-Elites Archive evaluation
+            archive = get_or_create_archive(session_id, fitness_fn=fitness_fn_name, behavior_fn=behavior_fn_name)
+            eval_record = archive.evaluate_and_add(telemetry, current_config)
+            archive_stats = archive.get_archive_stats()
 
-            # Feature 6: Emergent Playstyle Archetype Discovery
-            if toggles.get("f6_clustering", False):
-                archetype = compute_emergent_archetype(telemetry)
-                llm_result["playstyle_assessment"] = f"{archetype} [Unsupervised Clustering]"
+            # 2. Breed next genome via MAP-Elites
+            next_config = archive.breed_next_genome(player_behavior=eval_record["behavior"])
+            if "palette" in current_config:
+                next_config["palette"] = current_config["palette"]
+            if "theme_name" in current_config:
+                next_config["theme_name"] = current_config["theme_name"]
 
-            # Feature 7: Narrative-Architectural Isomorphism
-            narrative_info = None
-            if toggles.get("f7_isomorphism", False):
-                narrative_info = generate_narrative_isomorphism(level_num + 1)
-                llm_result["narrative_isomorphism"] = narrative_info
-                llm_result["adaptation_rationale"] += f" Narrative Degrade: '{narrative_info['title']}' - {narrative_info['lore']}"
-
-            # Feature 8: Asymmetric Dual-Path PCG
-            if toggles.get("f8_dual_path", False):
-                next_config["layout_style"] = "room-heavy"
-                next_config["corridor_width"] = 2
-                llm_result["adaptation_rationale"] += " [Asymmetric Dual-Path Route Activated]"
-
-            # Feature 9: Dynamic Environmental Reaction ("The Living Dungeon")
-            if toggles.get("f9_living_dungeon", False):
-                next_config, reaction_log = apply_living_dungeon_reaction(telemetry, next_config)
-                if reaction_log:
-                    llm_result["adaptation_rationale"] += f" [{reaction_log}]"
-
-            # Generate next map
+            # 3. Generate C++ Map
             next_map = run_pcg_generator(next_config)
 
-            # Save research session data
+            # 4. Lore LLM call
+            narrative = query_llm_narrative_only(level_num + 1, archive_stats, eval_record)
+
+            evo_eval = {
+                "playstyle_assessment": f"Fitness: {eval_record['fitness']:.4f} | Cell ({eval_record['grid_pos']['x']},{eval_record['grid_pos']['y']})",
+                "adaptation_rationale": f"MAP-Elites Archive Coverage: {archive_stats['coverage_percent']}% ({archive_stats['filled_cells']}/100 cells). Next genome bred via tournament selection + Gaussian mutation.",
+                "narrative_isomorphism": narrative,
+                "next_config": next_config,
+                "archive_stats": archive_stats,
+                "eval_record": eval_record,
+                "user_prompt_given": user_pref,
+                "llm_model_used": "MAP-Elites EA Engine"
+            }
+
+            # 5. Save session JSON
             session_file = os.path.join(SESSIONS_DIR, f"{session_id}.json")
             session_history = []
             if os.path.exists(session_file):
@@ -797,30 +501,41 @@ class DungeonServerHandler(BaseHTTPRequestHandler):
                 "telemetry": telemetry,
                 "user_preference": user_pref,
                 "previous_config": current_config,
-                "llm_eval": llm_result,
+                "eval_record": eval_record,
+                "archive_stats": archive_stats,
                 "next_config": next_config,
-                "research_toggles": toggles,
+                "narrative": narrative,
                 "timestamp": time.time()
             }
             session_history.append(session_entry)
             with open(session_file, "w") as f:
                 json.dump(session_history, f, indent=2)
 
-            # 1. Live Excel/CSV Logging
-            append_to_csv_logs(session_id, level_num, telemetry, current_config, next_config, llm_result)
-
-            # 2. Matplotlib Folder Plot Generation
+            # 6. CSV logging & Matplotlib plot generation
+            append_to_csv_logs(session_id, level_num, telemetry, current_config, next_config, evo_eval, eval_record, archive_stats)
             saved_plots = generate_session_matplotlib_plots(session_id)
 
             self.send_json_response({
                 "status": "success",
                 "session_id": session_id,
-                "llm_eval": llm_result,
+                "llm_eval": evo_eval,
                 "next_map": next_map,
                 "next_config": next_config,
-                "narrative": narrative_info,
+                "narrative": narrative,
+                "archive_stats": archive_stats,
                 "saved_plots": saved_plots
             })
+
+        elif self.path == "/api/archive_state":
+            session_id = req_json.get("session_id", "")
+            if session_id in ACTIVE_ARCHIVES:
+                archive = ACTIVE_ARCHIVES[session_id]
+                self.send_json_response({
+                    "status": "success",
+                    "archive": archive.to_dict()
+                })
+            else:
+                self.send_json_response({"status": "error", "message": "Archive not found for session"}, status=404)
 
         elif self.path == "/api/get_analytics":
             session_id = req_json.get("session_id", "")
@@ -845,20 +560,20 @@ class DungeonServerHandler(BaseHTTPRequestHandler):
         elif self.path == "/api/export_session":
             session_id = req_json.get("session_id", "")
             session_file = os.path.join(SESSIONS_DIR, f"{session_id}.json")
+            archive_data = ACTIVE_ARCHIVES[session_id].to_dict() if session_id in ACTIVE_ARCHIVES else {}
             if os.path.exists(session_file):
                 with open(session_file, "r") as f:
                     history = json.load(f)
-                self.send_json_response({"status": "success", "history": history})
+                self.send_json_response({"status": "success", "history": history, "archive": archive_data})
             else:
                 self.send_json_response({"status": "error", "message": "Session not found"}, status=404)
         else:
             self.send_error(404, "Endpoint not found")
 
-
 def main():
     ensure_binary()
     print(f"=====================================================")
-    print(f"🚀 Closed-Loop LLM PCG Research Server running on http://localhost:{PORT}")
+    print(f"🚀 Integrated MAP-Elites EA & Analytics Server running on http://localhost:{PORT}")
     print(f"=====================================================")
     httpd = HTTPServer(("0.0.0.0", PORT), DungeonServerHandler)
     try:

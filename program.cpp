@@ -112,6 +112,9 @@ struct Config {
   // Map dimensions (overridable from JSON)
   int map_width = 0; // 0 = auto
   int map_height = 0;
+
+  // Seed (overridable from JSON; 0 = auto-generate)
+  unsigned seed = 0;
 };
 
 // ── Tiny JSON extractor ───────────────────────────────────────
@@ -179,6 +182,14 @@ static Config parse_config(const std::string &json) {
   flt("trap_probability", c.trap_probability);
   flt("reward_density", c.reward_density);
   flt("difficulty", c.difficulty);
+
+  // Read seed from JSON (0 = auto-generate later)
+  {
+    auto sv = json_get(json, "seed");
+    if (!sv.empty()) {
+      try { c.seed = static_cast<unsigned>(std::stoul(sv)); } catch (...) {}
+    }
+  }
 
   // Clamp ranges
   c.corridor_width = std::clamp(c.corridor_width, 1, 3);
@@ -406,13 +417,28 @@ private:
   }
 
   // ── 3d. Start & Exit ───────────────────────────────────
+  //  Start = first room placed.
+  //  Exit  = the room whose center is FARTHEST from Start
+  //          (guarantees the player must traverse the dungeon).
   void place_start_exit() {
     if (rooms.empty())
       return;
     auto &s = rooms.front();
-    auto &e = rooms.back();
     map.at(s.cx(), s.cy()) = START;
-    map.at(e.cx(), e.cy()) = EXIT;
+
+    // Find the room farthest from the start room
+    int best_idx = (int)rooms.size() - 1;
+    double best_dist = 0.0;
+    for (int i = 1; i < (int)rooms.size(); ++i) {
+      double dx = rooms[i].cx() - s.cx();
+      double dy = rooms[i].cy() - s.cy();
+      double d = dx * dx + dy * dy;
+      if (d > best_dist) {
+        best_dist = d;
+        best_idx = i;
+      }
+    }
+    map.at(rooms[best_idx].cx(), rooms[best_idx].cy()) = EXIT;
   }
 
   // ── 3e. Traps (corridors & floors) ────────────────────
@@ -1257,7 +1283,7 @@ static void handle_client(socket_t client) {
         (body_start != std::string::npos) ? req.substr(body_start + 4) : "{}";
 
     Config cfg = parse_config(json_body);
-    unsigned seed = (unsigned)time(nullptr);
+    unsigned seed = cfg.seed ? cfg.seed : (unsigned)time(nullptr);
     DungeonGenerator gen(cfg, seed);
     gen.generate();
 
@@ -1358,7 +1384,8 @@ int main(int argc, char **argv) {
   std::cout << "Reward:        " << cfg.reward_density << "\n";
   std::cout << "Generating…\n";
 
-  DungeonGenerator gen(cfg, 42);
+  unsigned seed = cfg.seed ? cfg.seed : (unsigned)time(nullptr);
+  DungeonGenerator gen(cfg, seed);
   gen.generate();
 
   std::cout << "Rooms placed:  " << gen.rooms.size() << "\n";
@@ -1369,7 +1396,7 @@ int main(int argc, char **argv) {
   auto pixels = render_map(gen.map, cfg);
 
   if (argc >= 4 && (std::string(argv[3]) == "--json" || std::string(argv[3]) == "--export-json")) {
-    std::string json_data = export_map_json_str(gen, cfg, 42);
+    std::string json_data = export_map_json_str(gen, cfg, seed);
     std::ofstream f(output_path);
     if (f) {
       f << json_data;

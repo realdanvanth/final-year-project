@@ -1,0 +1,23 @@
+# Python compiled files & caches
+__pycache__/
+*.pyc
+*.pyo
+
+# C++ Build Binaries
+dungeon
+dungeon_map
+*.o
+*.out
+
+# Runtime Temporary Files
+tmp_input.json
+tmp_map.json
+tmp_map.png
+
+# Session & Analytics Outputs
+sessions/
+research_analytics/plots/
+research_analytics/*.csv
+
+# System files
+.DS_Store

@@ -13,8 +13,8 @@
     <div class="logo-group">
       <span class="logo-icon">🔮</span>
       <div>
-        <h1>Closed-Loop LLM PCG Engine v2</h1>
-        <p class="subtitle">Procedural Content Generation with LLM Guidance & Adaptive Playstyle Feedback Loop</p>
+        <h1>MAP-Elites Evolutionary PCG Engine v2</h1>
+        <p class="subtitle">Procedural Content Generation with Quality-Diversity Evolutionary Search & Adaptive Playstyle Feedback Loop</p>
       </div>
     </div>
     <div style="display: flex; gap: 0.6rem; align-items: center;">
@@ -119,11 +119,30 @@
         </div>
       </div>
 
+      <!-- MAP-Elites 10x10 Heatmap & Evolutionary Stats -->
+      <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent2); font-family: 'JetBrains Mono';">
+            🧬 MAP-ELITES ARCHIVE (10x10)
+          </span>
+          <span id="evoCoverage" class="badge" style="font-size: 0.65rem;">0% (0/100)</span>
+        </div>
+        <div style="display: flex; justify-content: center; margin-bottom: 0.5rem;">
+          <canvas id="evoHeatmapCanvas" width="200" height="200" style="border: 1px solid var(--border); border-radius: 4px; image-rendering: pixelated;"></canvas>
+        </div>
+        <div style="font-size: 0.68rem; font-family: 'JetBrains Mono'; color: var(--muted); display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem;">
+          <div>Avg Fitness: <span id="evoAvgFitness" style="color: #fff;">0.00</span></div>
+          <div>Max Fitness: <span id="evoMaxFitness" style="color: var(--accent2);">0.00</span></div>
+          <div>Generations: <span id="evoGenerations" style="color: #fff;">0</span></div>
+          <div>Niche: <span id="playerNicheLabel" style="color: var(--accent);">Cell [?,?]</span></div>
+        </div>
+      </div>
+
       <!-- LLM Input / Output Inspector Card -->
       <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; margin-bottom: 1rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
           <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono';">
-            🔍 LLM PROMPT INSPECTOR
+            🔍 LORE LLM INSPECTOR
           </span>
           <div style="display: flex; gap: 0.3rem;">
             <button id="tabLlmInput" class="btn btn-secondary active" style="padding: 0.2rem 0.5rem; font-size: 0.65rem;" onclick="switchLlmInspectorTab('input')">📥 Given</button>
@@ -131,37 +150,12 @@
           </div>
         </div>
 
-        <div id="llmInputPane" style="font-family: 'JetBrains Mono'; font-size: 0.68rem; color: var(--muted); max-height: 120px; overflow-y: auto; white-space: pre-wrap; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 6px;">
-📥 LLM Prompt Input Vector will be displayed after Level 1 completion.
+        <div id="llmInputPane" style="font-family: 'JetBrains Mono'; font-size: 0.68rem; color: var(--muted); max-height: 100px; overflow-y: auto; white-space: pre-wrap; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 6px;">
+📥 Lore LLM Prompt Input Vector will be displayed after Level 1 completion.
         </div>
 
-        <div id="llmOutputPane" style="display: none; font-family: 'JetBrains Mono'; font-size: 0.68rem; color: var(--teal); max-height: 120px; overflow-y: auto; white-space: pre-wrap; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 6px;">
-📤 LLM Output Payload will be displayed after Level 1 completion.
-        </div>
-      </div>
-
-      <!-- Advanced Research Feature Toggles (6 to 9) -->
-      <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; margin-bottom: 1rem;">
-        <div style="font-size: 0.75rem; font-weight: 700; color: var(--teal); font-family: 'JetBrains Mono'; margin-bottom: 0.6rem;">
-          🔬 EXPERIMENTAL RESEARCH TOGGLES (6-9)
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.72rem; font-family: 'JetBrains Mono';">
-          <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
-            <span>6. Emergent Playstyle Clustering</span>
-            <input type="checkbox" id="toggleF6" style="width: auto; cursor: pointer;" checked>
-          </label>
-          <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
-            <span>7. Narrative-Architectural Lore</span>
-            <input type="checkbox" id="toggleF7" style="width: auto; cursor: pointer;" checked>
-          </label>
-          <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
-            <span>8. Asymmetric Dual-Path PCG</span>
-            <input type="checkbox" id="toggleF8" style="width: auto; cursor: pointer;" checked>
-          </label>
-          <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
-            <span>9. Dynamic Living Dungeon</span>
-            <input type="checkbox" id="toggleF9" style="width: auto; cursor: pointer;" checked>
-          </label>
+        <div id="llmOutputPane" style="display: none; font-family: 'JetBrains Mono'; font-size: 0.68rem; color: var(--teal); max-height: 100px; overflow-y: auto; white-space: pre-wrap; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 6px;">
+📤 Lore LLM Output Payload will be displayed after Level 1 completion.
         </div>
       </div>
 
@@ -246,7 +240,7 @@
     </div>
   </div>
 
-  <!-- Level Complete & Dual-Mode LLM Feedback Modal -->
+  <!-- Level Complete & MAP-Elites Evolution Modal -->
   <div id="levelModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
@@ -255,7 +249,7 @@
       </div>
 
       <div style="font-size: 0.85rem; color: var(--muted);">
-        Level telemetry collected! Choose how Level N+1 should be generated:
+        Gameplay telemetry evaluated! MAP-Elites engine will select and mutate optimal map DNA for Level N+1:
       </div>
 
       <div class="telemetry-list" style="margin-bottom: 0.5rem;">
@@ -273,50 +267,23 @@
         </div>
       </div>
 
-      <!-- Mode Selector Tabs -->
-      <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-        <button id="tabCustom" class="btn btn-secondary active" style="flex: 1; padding: 0.5rem; font-size: 0.78rem;" onclick="switchFeedbackTab('custom')">
-          ✍ Provide Custom Feedback
-        </button>
-        <button id="tabAuto" class="btn btn-secondary" style="flex: 1; padding: 0.5rem; font-size: 0.78rem;" onclick="switchFeedbackTab('auto')">
-          🤖 Auto-Progress (AI Director)
-        </button>
-      </div>
-
-      <!-- Custom Feedback Pane -->
-      <div id="customFeedbackPane">
-        <label style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; display: block;">TARGET PREFERENCE:</label>
-        <div class="pref-options">
-          <button class="pref-btn active" onclick="selectFeedbackPref(this, 'Make the game much harder! I had it too easy!')">🔥 Make it much harder!</button>
-          <button class="pref-btn" onclick="selectFeedbackPref(this, 'Add more puzzle traps and hidden corridors')">🧩 More Traps & Corridors</button>
-          <button class="pref-btn" onclick="selectFeedbackPref(this, 'Spawn dense ambush monster hordes')">⚔ Heavy Ambush Hordes</button>
-          <button class="pref-btn" onclick="selectFeedbackPref(this, 'Casual play with higher health and chest rewards')">☕ Casual & High Chests</button>
-        </div>
-        <textarea id="customPref" class="custom-pref" style="margin-top: 0.6rem;" placeholder="Or type custom request for next level..."></textarea>
-      </div>
-
-      <!-- Auto Progress Pane -->
-      <div id="autoProgressPane" style="display: none; background: rgba(139,92,246,0.08); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; font-size: 0.8rem; color: #ddd6fe;">
-        ⚡ <strong>Autonomous AI Director Mode:</strong> The LLM will automatically evaluate your telemetry (speed, damage, deaths) alongside your original prompt to create an upgraded, tailored Level N+1 without manual input.
-      </div>
-
       <div id="llmThinking" style="display: none; font-size: 0.8rem; color: var(--teal); font-family: 'JetBrains Mono'; text-align: center; padding: 0.6rem; background: rgba(6,182,212,0.1); border-radius: 8px;">
-        🤖 OpenRouter LLM evaluating playstyle telemetry & generating Level N+1 PCG parameters...
+        🧬 MAP-Elites Quality-Diversity Engine selecting parents & mutating genome for Level N+1...
       </div>
 
       <div id="paramDiffBox" class="param-comparison" style="display: none;">
         <div class="param-box">
-          <div style="color: var(--muted);">Level N Config</div>
+          <div style="color: var(--muted);">Level N Genome</div>
           <div id="prevConfigView">Difficulty: 0.5</div>
         </div>
-        <div class="param-box" style="border-color: var(--accent);">
-          <div style="color: var(--accent);">Level N+1 LLM Config</div>
+        <div class="param-box" style="border-color: var(--accent2);">
+          <div style="color: var(--accent2);">Level N+1 Evolved Genome</div>
           <div id="nextConfigView">Difficulty: 0.85</div>
         </div>
       </div>
 
       <button id="btnNextLevel" class="btn" onclick="submitFeedbackNextLevel()">
-        🚀 Generate Upgraded Next Level via LLM
+        🧬 EVOLVE NEXT LEVEL VIA MAP-ELITES
       </button>
     </div>
   </div>
@@ -380,8 +347,8 @@
         </div>
 
         <div style="background: rgba(239,68,68,0.1); border: 1px solid var(--danger); border-radius: 8px; padding: 0.8rem; font-size: 0.75rem;">
-          <div style="font-weight: 700; color: var(--danger); font-family: 'JetBrains Mono'; margin-bottom: 0.4rem;">4. LLM MUTATION</div>
-          <div style="color: var(--muted);">AI Director mutates <b>G_{N+1} = G_N + ΔG</b> to keep player in Optimal Flow.</div>
+          <div style="font-weight: 700; color: var(--danger); font-family: 'JetBrains Mono'; margin-bottom: 0.4rem;">4. MAP-ELITES MUTATION</div>
+          <div style="color: var(--muted);">MAP-Elites archive breeds <b>G_{N+1} = G_N + ΔG</b> via tournament selection & crossover.</div>
         </div>
       </div>
 
@@ -392,17 +359,18 @@
   </div>
 
 
+  <script src="/static/evo_dashboard.js"></script>
   <script src="/static/game.js"></script>
   <script>
     let game = null;
+    let evoDash = null;
     let selectedInitialPrompt = "A dark obsidian abyss with narrow ambush corridors, deadly traps, and hidden treasure vaults";
-    let selectedFeedbackPreference = "Make the game much harder! I had it too easy!";
-    let currentFeedbackMode = "custom";
     let paramChart = null;
     let perfChart = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       game = new GameEngine('gameCanvas');
+      evoDash = new EvoDashboard('evoHeatmapCanvas');
       game.startLoop();
       initCharts();
       submitInitialPrompt();
@@ -416,6 +384,7 @@
         data: {
           labels: ['Lvl 1'],
           datasets: [
+            { label: 'MAP-Elites Fitness', data: [0.5], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.2)', borderWidth: 3, tension: 0.3 },
             { label: 'Difficulty', data: [0.5], borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.2)', borderWidth: 2, tension: 0.3 },
             { label: 'Room Density', data: [0.5], borderColor: '#06b6d4', backgroundColor: 'rgba(6,182,212,0.2)', borderWidth: 2, tension: 0.3 },
             { label: 'Enemy Density', data: [0.2], borderColor: '#f43f5e', backgroundColor: 'rgba(244,63,94,0.2)', borderWidth: 2, tension: 0.3 },
@@ -531,21 +500,6 @@
     }
 
 
-    function switchFeedbackTab(mode) {
-      currentFeedbackMode = mode;
-      document.getElementById('tabCustom').classList.toggle('active', mode === 'custom');
-      document.getElementById('tabAuto').classList.toggle('active', mode === 'auto');
-      document.getElementById('customFeedbackPane').style.display = mode === 'custom' ? 'block' : 'none';
-      document.getElementById('autoProgressPane').style.display = mode === 'auto' ? 'block' : 'none';
-    }
-
-    function selectFeedbackPref(btn, text) {
-      document.querySelectorAll('#customFeedbackPane .pref-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedFeedbackPreference = text;
-      document.getElementById('customPref').value = '';
-    }
-
     window.showLevelCompleteModal = function(levelNum, telemetry, currentConfig) {
       document.getElementById('modalLevelBadge').textContent = `Level ${levelNum} Complete`;
       document.getElementById('modalTime').textContent = `${telemetry.time_taken_sec.toFixed(1)}s`;
@@ -560,14 +514,7 @@
     };
 
     async function submitFeedbackNextLevel() {
-      let prefText = "";
-      if (currentFeedbackMode === 'custom') {
-        const customText = document.getElementById('customPref').value.trim();
-        prefText = customText || selectedFeedbackPreference;
-      } else {
-        prefText = "AUTO-PROGRESS: Autonomous AI Director playstyle evaluation and progression upgrade.";
-      }
-
+      const prefText = "Autonomous MAP-Elites Quality-Diversity EA playstyle evaluation and progression upgrade.";
       const thinking = document.getElementById('llmThinking');
       const btn = document.getElementById('btnNextLevel');
       thinking.style.display = 'block';
@@ -579,13 +526,7 @@
           level_number: game.levelNumber,
           telemetry: game.telemetry,
           user_preference: prefText,
-          current_config: game.currentConfig,
-          research_toggles: {
-            f6_clustering: document.getElementById('toggleF6').checked,
-            f7_isomorphism: document.getElementById('toggleF7').checked,
-            f8_dual_path: document.getElementById('toggleF8').checked,
-            f9_living_dungeon: document.getElementById('toggleF9').checked
-          }
+          current_config: game.currentConfig
         };
 
         const res = await fetch('/api/feedback_next_level', {
@@ -597,10 +538,18 @@
         const data = await res.json();
         if (data.status === 'success') {
           const evalResult = data.llm_eval;
-          document.getElementById('aiRationale').textContent = 
-            `[${evalResult.playstyle_assessment || 'Assessment'}] ${evalResult.adaptation_rationale}`;
+          const archiveStats = data.archive_stats;
+          const evalRecord = evalResult.eval_record;
 
-          renderLlmInspector(evalResult);
+          document.getElementById('aiRationale').textContent = 
+            `[MAP-Elites Fitness: ${evalRecord ? evalRecord.fitness.toFixed(4) : 'N/A'}] ${evalResult.adaptation_rationale}`;
+
+          if (evoDash && archiveStats) {
+            evoDash.renderHeatmap(archiveStats, evalRecord ? evalRecord.grid_pos : null);
+            evoDash.updateStatsUI(archiveStats, evalRecord);
+          }
+
+          renderLlmInspector(evalResult, data.narrative);
 
           document.getElementById('prevConfigView').innerHTML = formatConfig(game.currentConfig);
           document.getElementById('nextConfigView').innerHTML = formatConfigWithDeltas(game.currentConfig, data.next_config);
@@ -612,28 +561,32 @@
           setTimeout(() => {
             document.getElementById('levelModal').classList.remove('active');
             game.loadMap(data.next_map);
-            game.addLog(`🚀 Upgraded Level ${game.levelNumber} Generated by LLM Feedback Loop!`);
+            game.addLog(`🚀 Level ${game.levelNumber} Evolved via MAP-Elites Archive!`);
           }, 2000);
         }
       } catch (e) {
-        alert('Error sending feedback to LLM: ' + e.message);
+        alert('Error communicating with MAP-Elites Engine: ' + e.message);
         btn.style.display = 'block';
         thinking.style.display = 'none';
       }
     }
 
-    function renderLlmInspector(evalResult) {
+    function renderLlmInspector(evalResult, narrative) {
       const inputPane = document.getElementById('llmInputPane');
       const outputPane = document.getElementById('llmOutputPane');
 
-      if (inputPane && evalResult.user_prompt_given) {
-        inputPane.textContent = evalResult.user_prompt_given;
+      if (inputPane && evalResult) {
+        inputPane.textContent = `Evolutionary Prompt State:\n` +
+          `- Player Niche Cell: (${evalResult.eval_record ? evalResult.eval_record.grid_pos.x : '?'}, ${evalResult.eval_record ? evalResult.eval_record.grid_pos.y : '?'})\n` +
+          `- Target Preference: "${evalResult.user_prompt_given || 'N/A'}"\n` +
+          `- Coverage: ${evalResult.archive_stats ? evalResult.archive_stats.coverage_percent : 0}%`;
       }
       if (outputPane) {
-        outputPane.textContent = `Model: ${evalResult.llm_model_used || 'AI Director'}\n\n` +
-          `Archetype: ${evalResult.playstyle_assessment || 'N/A'}\n\n` +
-          `Rationale: ${evalResult.adaptation_rationale || 'N/A'}\n\n` +
-          `Raw Response:\n${evalResult.llm_raw_response || 'N/A'}`;
+        const title = narrative ? narrative.title : (evalResult.narrative_isomorphism ? evalResult.narrative_isomorphism.title : 'N/A');
+        const lore = narrative ? narrative.lore : (evalResult.narrative_isomorphism ? evalResult.narrative_isomorphism.lore : 'N/A');
+        outputPane.textContent = `Model: ${evalResult.llm_model_used || 'MAP-Elites Engine'}\n\n` +
+          `Lore Title: ${title}\n\n` +
+          `Lore Story:\n${lore}`;
       }
     }
 
@@ -686,20 +639,22 @@
     function updateLiveCharts(history) {
       if (!history || !history.length) return;
       const labels = history.map(h => `Lvl ${h.level_number}`);
-      const diffData = history.map(h => (h.next_config.difficulty || 0.5));
-      const roomData = history.map(h => (h.next_config.room_density || 0.5));
-      const enemyData = history.map(h => (h.next_config.enemy_density || 0.2));
-      const trapData = history.map(h => (h.next_config.trap_probability || 0.15));
+      const fitnessData = history.map(h => (h.eval_record ? h.eval_record.fitness : 0.5));
+      const diffData = history.map(h => (h.next_config ? h.next_config.difficulty : 0.5));
+      const roomData = history.map(h => (h.next_config ? h.next_config.room_density : 0.5));
+      const enemyData = history.map(h => (h.next_config ? h.next_config.enemy_density : 0.2));
+      const trapData = history.map(h => (h.next_config ? h.next_config.trap_probability : 0.15));
 
-      const timeData = history.map(h => (h.telemetry.time_taken_sec || 0));
-      const dmgData = history.map(h => (h.telemetry.damage_taken || 0));
+      const timeData = history.map(h => (h.telemetry ? h.telemetry.time_taken_sec : 0));
+      const dmgData = history.map(h => (h.telemetry ? h.telemetry.damage_taken : 0));
 
       if (paramChart) {
         paramChart.data.labels = labels;
-        paramChart.data.datasets[0].data = diffData;
-        paramChart.data.datasets[1].data = roomData;
-        paramChart.data.datasets[2].data = enemyData;
-        paramChart.data.datasets[3].data = trapData;
+        paramChart.data.datasets[0].data = fitnessData;
+        paramChart.data.datasets[1].data = diffData;
+        paramChart.data.datasets[2].data = roomData;
+        paramChart.data.datasets[3].data = enemyData;
+        paramChart.data.datasets[4].data = trapData;
         paramChart.update();
       }
 
