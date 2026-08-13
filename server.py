@@ -8,6 +8,12 @@ import urllib.request
 import urllib.error
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
+import csv
+os.environ["MPLCONFIGDIR"] = "/tmp/matplotlib"
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 PORT = 8080
 OPENROUTER_API_KEY = os.environ.get(
     "OPENROUTER_API_KEY",
@@ -16,8 +22,145 @@ OPENROUTER_API_KEY = os.environ.get(
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DUNGEON_BIN = os.path.join(BASE_DIR, "dungeon_map")
 SESSIONS_DIR = os.path.join(BASE_DIR, "sessions")
+ANALYTICS_DIR = os.path.join(BASE_DIR, "research_analytics")
+PLOTS_DIR = os.path.join(ANALYTICS_DIR, "plots")
 
 os.makedirs(SESSIONS_DIR, exist_ok=True)
+os.makedirs(ANALYTICS_DIR, exist_ok=True)
+os.makedirs(PLOTS_DIR, exist_ok=True)
+
+def append_to_csv_logs(session_id, level_num, telemetry, prev_config, next_config, llm_eval):
+    telemetry_csv = os.path.join(ANALYTICS_DIR, "session_telemetry.csv")
+    llm_csv = os.path.join(ANALYTICS_DIR, "llm_parameters_history.csv")
+
+    write_tel_header = not os.path.exists(telemetry_csv)
+    with open(telemetry_csv, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        if write_tel_header:
+            writer.writerow([
+                "Session_ID", "Level_Number", "Timestamp", "Clear_Time_Sec",
+                "Damage_Taken", "Health_Remaining", "Deaths_Retries",
+                "Enemies_Killed", "Total_Enemies", "Chests_Opened", "Total_Chests",
+                "Traps_Triggered", "Exploration_Percent", "Playstyle_Assessment"
+            ])
+        writer.writerow([
+            session_id, level_num, time.strftime("%Y-%m-%d %H:%M:%S"),
+            f"{telemetry.get('time_taken_sec', 0):.2f}",
+            telemetry.get('damage_taken', 0),
+            telemetry.get('health_remaining', 100),
+            telemetry.get('deaths_retries', 0),
+            telemetry.get('enemies_killed', 0),
+            telemetry.get('total_enemies', 0),
+            telemetry.get('chests_opened', 0),
+            telemetry.get('total_chests', 0),
+            telemetry.get('traps_triggered', 0),
+            f"{telemetry.get('exploration_percent', 0):.1f}",
+            llm_eval.get("playstyle_assessment", "N/A")
+        ])
+
+    write_llm_header = not os.path.exists(llm_csv)
+    with open(llm_csv, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        if write_llm_header:
+            writer.writerow([
+                "Session_ID", "Level_Number", "Timestamp", "User_Preference",
+                "Theme_Name", "Layout_Style", "Corridor_Width", "Room_Density",
+                "Enemy_Density", "Enemy_Type", "Difficulty", "Trap_Probability",
+                "Visibility", "Reward_Density", "LLM_Model", "Adaptation_Rationale"
+            ])
+        writer.writerow([
+            session_id, level_num, time.strftime("%Y-%m-%d %H:%M:%S"),
+            llm_eval.get("user_prompt_given", "N/A"),
+            next_config.get("theme_name", "Dark Obsidian"),
+            next_config.get("layout_style", "balanced"),
+            next_config.get("corridor_width", 2),
+            f"{next_config.get('room_density', 0.5):.2f}",
+            f"{next_config.get('enemy_density', 0.2):.2f}",
+            next_config.get("enemy_type", "patrol"),
+            f"{next_config.get('difficulty', 0.5):.2f}",
+            f"{next_config.get('trap_probability', 0.15):.2f}",
+            next_config.get("visibility", "normal"),
+            f"{next_config.get('reward_density', 0.15):.2f}",
+            llm_eval.get("llm_model_used", "Rule Engine"),
+            str(llm_eval.get("adaptation_rationale", "N/A")).replace("\n", " ")
+        ])
+
+def generate_session_matplotlib_plots(session_id=""):
+    saved_plots = []
+    if session_id:
+        session_file = os.path.join(SESSIONS_DIR, f"{session_id}.json")
+        if os.path.exists(session_file):
+            try:
+                with open(session_file, "r") as f:
+                    history = json.load(f)
+                if history:
+                    levels = [entry.get("level_number", idx + 1) for idx, entry in enumerate(history)]
+                    difficulty = [entry.get("next_config", {}).get("difficulty", 0.5) for entry in history]
+                    room_density = [entry.get("next_config", {}).get("room_density", 0.5) for entry in history]
+                    enemy_density = [entry.get("next_config", {}).get("enemy_density", 0.2) for entry in history]
+                    trap_prob = [entry.get("next_config", {}).get("trap_probability", 0.15) for entry in history]
+
+                    clear_time = [entry.get("telemetry", {}).get("time_taken_sec", 0) for entry in history]
+                    damage_taken = [entry.get("telemetry", {}).get("damage_taken", 0) for entry in history]
+
+                    # 1. Parameter Evolution Line Chart
+                    fig, ax = plt.subplots(figsize=(8, 4.5), dpi=150)
+                    fig.patch.set_facecolor('#090a0f')
+                    ax.set_facecolor('#121624')
+                    ax.plot(levels, difficulty, marker='o', color='#8b5cf6', label='Difficulty', linewidth=2.5)
+                    ax.plot(levels, room_density, marker='s', color='#06b6d4', label='Room Density', linewidth=2)
+                    ax.plot(levels, enemy_density, marker='^', color='#f43f5e', label='Enemy Density', linewidth=2)
+                    ax.plot(levels, trap_prob, marker='d', color='#f59e0b', label='Trap Probability', linewidth=2)
+
+                    ax.set_title(f'PCG Parameter Evolution — Session {session_id}', color='#f1f5f9', fontsize=11, fontweight='bold')
+                    ax.set_xlabel('Level Generation', color='#94a3b8')
+                    ax.set_ylabel('Parameter Value (0.0 - 1.0)', color='#94a3b8')
+                    ax.tick_params(colors='#94a3b8')
+                    ax.grid(True, color='#334155', linestyle='--')
+                    ax.legend(facecolor='#090a0f', edgecolor='#94a3b8', labelcolor='#f1f5f9')
+
+                    plt.tight_layout()
+                    plot_file1 = f"plot_parameter_evolution_{session_id}.png"
+                    plt.savefig(os.path.join(PLOTS_DIR, plot_file1), facecolor=fig.get_facecolor())
+                    plt.close()
+                    saved_plots.append(plot_file1)
+
+                    # 2. Player Performance Bar Chart
+                    fig, ax1 = plt.subplots(figsize=(8, 4.5), dpi=150)
+                    fig.patch.set_facecolor('#090a0f')
+                    ax1.set_facecolor('#121624')
+
+                    x_indices = list(range(len(levels)))
+                    width = 0.35
+                    ax1.bar([i - width/2 for i in x_indices], clear_time, width, label='Clear Time (s)', color='#06b6d4')
+                    ax1.bar([i + width/2 for i in x_indices], damage_taken, width, label='Damage Taken (HP)', color='#ef4444')
+
+                    ax1.set_title(f'Player Performance Metrics — Session {session_id}', color='#f1f5f9', fontsize=11, fontweight='bold')
+                    ax1.set_xlabel('Level Generation', color='#94a3b8')
+                    ax1.set_ylabel('Time (s) / Damage (HP)', color='#94a3b8')
+                    ax1.set_xticks(x_indices)
+                    ax1.set_xticklabels([f"Lvl {l}" for l in levels], color='#94a3b8')
+                    ax1.tick_params(colors='#94a3b8')
+                    ax1.grid(True, color='#334155', linestyle='--')
+                    ax1.legend(facecolor='#090a0f', edgecolor='#94a3b8', labelcolor='#f1f5f9')
+
+                    plt.tight_layout()
+                    plot_file2 = f"plot_player_performance_{session_id}.png"
+                    plt.savefig(os.path.join(PLOTS_DIR, plot_file2), facecolor=fig.get_facecolor())
+                    plt.close()
+                    saved_plots.append(plot_file2)
+            except Exception as e:
+                print("Error reading session history for plots:", e)
+
+    # Always scan PLOTS_DIR for all available plot PNG files
+    if os.path.exists(PLOTS_DIR):
+        for fname in sorted(os.listdir(PLOTS_DIR)):
+            if fname.endswith(".png") and fname not in saved_plots:
+                saved_plots.append(fname)
+
+    return saved_plots
+
+
 
 DEFAULT_CONFIG = {
     "theme": "dark",
@@ -268,7 +411,7 @@ Generate dynamic dungeon parameters matching this player description:
                 data=json.dumps({"model": m, "messages": [{"role": "user", "content": sys_content}]}).encode("utf-8"),
                 headers={"Content-Type": "application/json", "Authorization": f"Bearer {OPENROUTER_API_KEY}"}
             )
-            with urllib.request.urlopen(req, timeout=8) as response:
+            with urllib.request.urlopen(req, timeout=3) as response:
                 res_data = json.loads(response.read().decode("utf-8"))
                 content = res_data["choices"][0]["message"]["content"]
                 cleaned = content.replace("```json", "").replace("```", "").strip()
@@ -289,6 +432,7 @@ Generate dynamic dungeon parameters matching this player description:
     cfg["theme_name"] = dynamic_palette["theme_name"]
     cfg["theme"] = dynamic_palette["theme"]
     cfg["palette"] = dynamic_palette["palette"]
+
 
     if any(k in p for k in ["huge", "mega", "large", "giant", "massive"]):
         cfg["map_width"] = 80
@@ -449,12 +593,17 @@ Return ONLY raw JSON in this EXACT structure (no markdown, no code blocks):
                 parsed = json.loads(cleaned)
                 if "next_config" in parsed:
                     print(f"✅ OpenRouter model ({m}) successfully evaluated feedback!")
+                    parsed["llm_model_used"] = m
+                    parsed["user_prompt_given"] = user_prompt
+                    parsed["llm_raw_response"] = content
                     return parsed
         except Exception as e:
             print(f"Model {m} call failed: {e}")
 
     print("Falling back to Heuristic Feedback Rule Engine...")
-    return fallback_heuristic_feedback(telemetry, user_pref, current_config)
+    res = fallback_heuristic_feedback(telemetry, user_pref, current_config)
+    res["user_prompt_given"] = user_prompt
+    return res
 
 
 def fallback_heuristic_feedback(telemetry, user_pref, current_config):
@@ -501,8 +650,15 @@ def fallback_heuristic_feedback(telemetry, user_pref, current_config):
     return {
         "playstyle_assessment": assessment,
         "adaptation_rationale": " ".join(rationale_parts) or "Adapted PCG parameters based on clear speed and damage metrics.",
-        "next_config": cfg
+        "next_config": cfg,
+        "llm_model_used": "Deterministic Rule Engine (Offline Fallback)",
+        "llm_raw_response": json.dumps({
+            "playstyle_assessment": assessment,
+            "adaptation_rationale": " ".join(rationale_parts) or "Adapted PCG parameters based on clear speed and damage metrics.",
+            "next_config": cfg
+        }, indent=2)
     }
+
 
 class DungeonServerHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -533,6 +689,15 @@ class DungeonServerHandler(BaseHTTPRequestHandler):
                 content_type = "application/javascript"
             elif file_path.endswith(".png"):
                 content_type = "image/png"
+            else:
+                content_type = "text/plain"
+        elif url_path.startswith("/research_analytics/"):
+            rel = url_path.replace("/research_analytics/", "")
+            file_path = os.path.join(ANALYTICS_DIR, rel)
+            if file_path.endswith(".png"):
+                content_type = "image/png"
+            elif file_path.endswith(".csv"):
+                content_type = "text/csv"
             else:
                 content_type = "text/plain"
         elif url_path == "/tmp_map.png":
@@ -577,8 +742,6 @@ class DungeonServerHandler(BaseHTTPRequestHandler):
             config = req_json.get("config") or DEFAULT_CONFIG
             map_data = run_pcg_generator(config)
             self.send_json_response({"status": "success", "map": map_data})
-
-
 
         elif self.path == "/api/feedback_next_level":
             telemetry = req_json.get("telemetry", {})
@@ -643,15 +806,41 @@ class DungeonServerHandler(BaseHTTPRequestHandler):
             with open(session_file, "w") as f:
                 json.dump(session_history, f, indent=2)
 
+            # 1. Live Excel/CSV Logging
+            append_to_csv_logs(session_id, level_num, telemetry, current_config, next_config, llm_result)
+
+            # 2. Matplotlib Folder Plot Generation
+            saved_plots = generate_session_matplotlib_plots(session_id)
+
             self.send_json_response({
                 "status": "success",
                 "session_id": session_id,
                 "llm_eval": llm_result,
                 "next_map": next_map,
                 "next_config": next_config,
-                "narrative": narrative_info
+                "narrative": narrative_info,
+                "saved_plots": saved_plots
             })
 
+        elif self.path == "/api/get_analytics":
+            session_id = req_json.get("session_id", "")
+            session_file = os.path.join(SESSIONS_DIR, f"{session_id}.json")
+            history = []
+            if os.path.exists(session_file):
+                try:
+                    with open(session_file, "r") as f:
+                        history = json.load(f)
+                except Exception:
+                    history = []
+            saved_plots = generate_session_matplotlib_plots(session_id)
+            self.send_json_response({
+                "status": "success",
+                "session_id": session_id,
+                "history": history,
+                "saved_plots": saved_plots,
+                "telemetry_csv": "/research_analytics/session_telemetry.csv",
+                "llm_csv": "/research_analytics/llm_parameters_history.csv"
+            })
 
         elif self.path == "/api/export_session":
             session_id = req_json.get("session_id", "")
@@ -664,6 +853,7 @@ class DungeonServerHandler(BaseHTTPRequestHandler):
                 self.send_json_response({"status": "error", "message": "Session not found"}, status=404)
         else:
             self.send_error(404, "Endpoint not found")
+
 
 def main():
     ensure_binary()

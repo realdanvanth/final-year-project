@@ -1,29 +1,13 @@
 {
-  "theme_name": "Golden Candy Castle",
-  "theme": "light",
-  "palette": {
-    "background": "#FFF4E0",
-    "wall": "#FFD700",
-    "floor": "#FFE4B5",
-    "corridor": "#FFC0CB",
-    "door": "#CD853F",
-    "trap": "#FF6347",
-    "enemy": "#8B4513",
-    "chest": "#FFA500",
-    "start": "#32CD32",
-    "exit": "#FF4500",
-    "fog": "#FFEBCD"
-  },
-  "map_width": 60,
-  "map_height": 60,
+  "theme": "dark",
   "layout_style": "room-heavy",
   "corridor_width": 2,
-  "room_density": 0.7,
-  "enemy_density": 0.3,
-  "enemy_type": "patrol",
-  "difficulty": 0.4,
-  "trap_probability": 0.2,
-  "visibility": "normal",
-  "reward_density": 0.4,
-  "seed": 460605
+  "room_density": 0.9,
+  "enemy_density": 0.5,
+  "enemy_type": "ambush",
+  "difficulty": 0.9,
+  "trap_probability": 0.5,
+  "visibility": "low",
+  "reward_density": 0.1,
+  "seed": 789870
 }

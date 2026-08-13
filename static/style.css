@@ -405,3 +405,45 @@ textarea.custom-pref:focus {
   padding: 0.6rem;
   border-radius: 8px;
 }
+
+/* Parameter Delta Badges */
+.badge-up {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: #10b981 !important;
+  color: #34d399 !important;
+  padding: 0.1rem 0.4rem !important;
+  font-size: 0.65rem !important;
+  border-radius: 4px !important;
+  display: inline-block !important;
+}
+
+.badge-down {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: #ef4444 !important;
+  color: #f87171 !important;
+  padding: 0.1rem 0.4rem !important;
+  font-size: 0.65rem !important;
+  border-radius: 4px !important;
+  display: inline-block !important;
+}
+
+/* Custom scrollbar for log & code panes */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+

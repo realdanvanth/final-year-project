@@ -1,0 +1,314 @@
+[
+  {
+    "level_number": 1,
+    "telemetry": {
+      "startTime": 88469,
+      "endTime": 130540,
+      "time_taken_sec": 42.071,
+      "damage_taken": 85,
+      "health_remaining": 100,
+      "deaths_retries": 0,
+      "enemies_killed": 7,
+      "total_enemies": 10,
+      "chests_opened": 17,
+      "total_chests": 144,
+      "traps_triggered": 3,
+      "exploration_percent": 100,
+      "segment_times": []
+    },
+    "user_preference": "Make the game much harder! I had it too easy!",
+    "previous_config": {
+      "theme_name": "Gilded Cavern Fortress",
+      "theme": "light",
+      "palette": {
+        "background": "#F0D9B5",
+        "wall": "#D4AF37",
+        "floor": "#C19A6B",
+        "corridor": "#B8860B",
+        "door": "#8B4513",
+        "trap": "#CD5C5C",
+        "enemy": "#6B4423",
+        "chest": "#FFD700",
+        "start": "#32CD32",
+        "exit": "#4169E1",
+        "fog": "#C0C0C0"
+      },
+      "map_width": 75,
+      "map_height": 75,
+      "layout_style": "balanced",
+      "corridor_width": 2,
+      "room_density": 0.4,
+      "enemy_density": 0.3,
+      "enemy_type": "ambush",
+      "difficulty": 0.6,
+      "trap_probability": 0.25,
+      "visibility": "normal",
+      "reward_density": 0.25,
+      "seed": 843185
+    },
+    "llm_eval": {
+      "playstyle_assessment": "Cluster Gamma: Panic Striker (High Hesitation, Hazard Volatility) [Unsupervised Clustering]",
+      "adaptation_rationale": "Player cleared the level rapidly with minimal damage and explicitly requested increased difficulty. Metrics show high exploration but low enemy engagement (7/10 killed), suggesting untapped challenge capacity. Adaptive response focuses on ambush tactics and environmental hazards to counter speedrunning playstyle. Narrative Degrade: 'Act II: The Corrupted Abyss' - Dark void magic erodes the sanctuary pillars, spawning dimensional rifts. [Asymmetric Dual-Path Route Activated] [Dungeon dynamically recalibrated enemy patrol routes.]",
+      "next_config": {
+        "theme": "dark",
+        "layout_style": "corridor-heavy",
+        "corridor_width": 1,
+        "room_density": 0.2,
+        "enemy_density": 0.45,
+        "enemy_type": "ambush",
+        "difficulty": 0.9,
+        "trap_probability": 0.4,
+        "visibility": "low",
+        "reward_density": 0.15
+      },
+      "narrative_isomorphism": {
+        "title": "Act II: The Corrupted Abyss",
+        "lore": "Dark void magic erodes the sanctuary pillars, spawning dimensional rifts.",
+        "degrade_factor": 0.25,
+        "theme": "dark"
+      }
+    },
+    "next_config": {
+      "theme": "dark",
+      "layout_style": "room-heavy",
+      "corridor_width": 2,
+      "room_density": 0.2,
+      "enemy_density": 0.45,
+      "enemy_type": "ambush",
+      "difficulty": 0.9,
+      "trap_probability": 0.4,
+      "visibility": "low",
+      "reward_density": 0.15,
+      "seed": 905128
+    },
+    "research_toggles": {
+      "f6_clustering": true,
+      "f7_isomorphism": true,
+      "f8_dual_path": true,
+      "f9_living_dungeon": true
+    },
+    "timestamp": 1785490905.547707
+  },
+  {
+    "level_number": 2,
+    "telemetry": {
+      "startTime": 152611,
+      "endTime": 182540,
+      "time_taken_sec": 29.929,
+      "damage_taken": 65,
+      "health_remaining": 35,
+      "deaths_retries": 0,
+      "enemies_killed": 3,
+      "total_enemies": 25,
+      "chests_opened": 6,
+      "total_chests": 62,
+      "traps_triggered": 3,
+      "exploration_percent": 80.0836820083682,
+      "segment_times": []
+    },
+    "user_preference": "Make the game much harder! I had it too easy!",
+    "previous_config": {
+      "theme": "dark",
+      "layout_style": "room-heavy",
+      "corridor_width": 2,
+      "room_density": 0.2,
+      "enemy_density": 0.45,
+      "enemy_type": "ambush",
+      "difficulty": 0.9,
+      "trap_probability": 0.4,
+      "visibility": "low",
+      "reward_density": 0.15,
+      "seed": 905128
+    },
+    "llm_eval": {
+      "playstyle_assessment": "Cluster Gamma: Panic Striker (High Hesitation, Hazard Volatility) [Unsupervised Clustering]",
+      "adaptation_rationale": "Player cleared the level quickly with minimal damage but explicitly requested much greater challenge. Telemetry shows low enemy engagement (3/25 killed) and high exploration rate (80.1%) suggesting they bypassed combat. Will escalate difficulty through increased enemy density, ambush tactics, and environmental threats. Narrative Degrade: 'Act III: The Blood Magma Core' - Molten lava breaches the lower chambers as architectural stability collapses. [Asymmetric Dual-Path Route Activated] [Dungeon dynamically recalibrated enemy patrol routes.]",
+      "next_config": {
+        "theme": "dark",
+        "layout_style": "room-heavy",
+        "corridor_width": 1,
+        "room_density": 0.3,
+        "enemy_density": 0.5,
+        "enemy_type": "ambush",
+        "difficulty": 1.0,
+        "trap_probability": 0.5,
+        "visibility": "low",
+        "reward_density": 0.1
+      },
+      "narrative_isomorphism": {
+        "title": "Act III: The Blood Magma Core",
+        "lore": "Molten lava breaches the lower chambers as architectural stability collapses.",
+        "degrade_factor": 0.5,
+        "theme": "dark"
+      }
+    },
+    "next_config": {
+      "theme": "dark",
+      "layout_style": "room-heavy",
+      "corridor_width": 2,
+      "room_density": 0.3,
+      "enemy_density": 0.5,
+      "enemy_type": "ambush",
+      "difficulty": 1.0,
+      "trap_probability": 0.5,
+      "visibility": "low",
+      "reward_density": 0.1,
+      "seed": 944500
+    },
+    "research_toggles": {
+      "f6_clustering": true,
+      "f7_isomorphism": true,
+      "f8_dual_path": true,
+      "f9_living_dungeon": true
+    },
+    "timestamp": 1785490944.933701
+  },
+  {
+    "level_number": 3,
+    "telemetry": {
+      "startTime": 191997,
+      "endTime": 228657,
+      "time_taken_sec": 36.66,
+      "damage_taken": 91,
+      "health_remaining": 44,
+      "deaths_retries": 0,
+      "enemies_killed": 5,
+      "total_enemies": 56,
+      "chests_opened": 6,
+      "total_chests": 43,
+      "traps_triggered": 3,
+      "exploration_percent": 41.405788541051386,
+      "segment_times": []
+    },
+    "user_preference": "I wANT A lava zone next",
+    "previous_config": {
+      "theme": "dark",
+      "layout_style": "room-heavy",
+      "corridor_width": 2,
+      "room_density": 0.3,
+      "enemy_density": 0.5,
+      "enemy_type": "ambush",
+      "difficulty": 1,
+      "trap_probability": 0.5,
+      "visibility": "low",
+      "reward_density": 0.1,
+      "seed": 944500
+    },
+    "llm_eval": {
+      "playstyle_assessment": "Cluster Gamma: Panic Striker (High Hesitation, Hazard Volatility) [Unsupervised Clustering]",
+      "adaptation_rationale": "Player cleared the level quickly with minimal damage and requested a lava zone, indicating a desire for increased challenge. Adjusted parameters to create a high-risk, high-reward environment with tighter spaces, more ambushes, and environmental hazards. Narrative Degrade: 'Act IV: The Void Citadel' - Total reality collapse. Corridors morph into spatial anomaly traps. [Asymmetric Dual-Path Route Activated] [Dungeon dynamically recalibrated enemy patrol routes.]",
+      "next_config": {
+        "theme": "lava",
+        "layout_style": "room-heavy",
+        "corridor_width": 1,
+        "room_density": 0.4,
+        "enemy_density": 0.5,
+        "enemy_type": "ambush",
+        "difficulty": 0.9,
+        "trap_probability": 0.5,
+        "visibility": "low",
+        "reward_density": 0.3
+      },
+      "narrative_isomorphism": {
+        "title": "Act IV: The Void Citadel",
+        "lore": "Total reality collapse. Corridors morph into spatial anomaly traps.",
+        "degrade_factor": 0.75,
+        "theme": "dark"
+      }
+    },
+    "next_config": {
+      "theme": "lava",
+      "layout_style": "room-heavy",
+      "corridor_width": 2,
+      "room_density": 0.4,
+      "enemy_density": 0.5,
+      "enemy_type": "ambush",
+      "difficulty": 0.9,
+      "trap_probability": 0.5,
+      "visibility": "low",
+      "reward_density": 0.3,
+      "seed": 476
+    },
+    "research_toggles": {
+      "f6_clustering": true,
+      "f7_isomorphism": true,
+      "f8_dual_path": true,
+      "f9_living_dungeon": true
+    },
+    "timestamp": 1785491000.9159427
+  },
+  {
+    "level_number": 4,
+    "telemetry": {
+      "startTime": 247978,
+      "endTime": 299257,
+      "time_taken_sec": 51.28,
+      "damage_taken": 209,
+      "health_remaining": 100,
+      "deaths_retries": 1,
+      "enemies_killed": 10,
+      "total_enemies": 54,
+      "chests_opened": 23,
+      "total_chests": 157,
+      "traps_triggered": 9,
+      "exploration_percent": 100,
+      "segment_times": []
+    },
+    "user_preference": "Casual play with higher health and chest rewards",
+    "previous_config": {
+      "theme": "lava",
+      "layout_style": "room-heavy",
+      "corridor_width": 2,
+      "room_density": 0.4,
+      "enemy_density": 0.5,
+      "enemy_type": "ambush",
+      "difficulty": 0.9,
+      "trap_probability": 0.5,
+      "visibility": "low",
+      "reward_density": 0.3,
+      "seed": 476
+    },
+    "llm_eval": {
+      "playstyle_assessment": "Cluster Gamma: Panic Striker (High Hesitation, Hazard Volatility) [Unsupervised Clustering]",
+      "adaptation_rationale": "Player achieved 100% exploration with minimal damage taken, but requested more casual play with higher health and chest rewards. Reduced difficulty parameters while maintaining exploration incentives by increasing reward density and lowering combat pressure. Narrative Degrade: 'Act IV: The Void Citadel' - Total reality collapse. Corridors morph into spatial anomaly traps. [Asymmetric Dual-Path Route Activated] [Dungeon expanded room networks to challenge cautious exploration.]",
+      "next_config": {
+        "theme": "lava",
+        "layout_style": "room-heavy",
+        "corridor_width": 2,
+        "room_density": 0.4,
+        "enemy_density": 0.3,
+        "enemy_type": "patrol",
+        "difficulty": 0.6,
+        "trap_probability": 0.3,
+        "visibility": "normal",
+        "reward_density": 0.4
+      },
+      "narrative_isomorphism": {
+        "title": "Act IV: The Void Citadel",
+        "lore": "Total reality collapse. Corridors morph into spatial anomaly traps.",
+        "degrade_factor": 0.75,
+        "theme": "dark"
+      }
+    },
+    "next_config": {
+      "theme": "lava",
+      "layout_style": "room-heavy",
+      "corridor_width": 2,
+      "room_density": 0.5,
+      "enemy_density": 0.3,
+      "enemy_type": "roaming",
+      "difficulty": 0.6,
+      "trap_probability": 0.3,
+      "visibility": "normal",
+      "reward_density": 0.4,
+      "seed": 61589
+    },
+    "research_toggles": {
+      "f6_clustering": true,
+      "f7_isomorphism": true,
+      "f8_dual_path": true,
+      "f9_living_dungeon": true
+    },
+    "timestamp": 1785491062.023181
+  }
+]
