@@ -157,6 +157,7 @@ class GameEngine {
     this.currentConfig = null;
     this.isLoaded = false;
     this.isGameOver = false;
+    this.isPaused = false;
 
     // Player State
     this.player = {
@@ -262,6 +263,10 @@ class GameEngine {
         e.preventDefault();
         this.handleAttack();
       }
+      if (key === 'p' && this.isLoaded && !this.isGameOver) {
+        e.preventDefault();
+        this.togglePause();
+      }
     });
 
     window.addEventListener('keyup', (e) => {
@@ -335,6 +340,7 @@ class GameEngine {
 
     this.isLoaded = true;
     this.isGameOver = false;
+    this.isPaused = false;
 
     this.canvas.width = mapJson.width * this.tileSize;
     this.canvas.height = mapJson.height * this.tileSize;
@@ -359,6 +365,11 @@ class GameEngine {
 
   update(dt) {
     if (!this.isLoaded || this.isGameOver) return;
+
+    if (this.isPaused) {
+      this.telemetry.startTime += dt * 1000;
+      return;
+    }
 
     if (this.player.invulnerableTimer > 0) {
       this.player.invulnerableTimer -= dt;
@@ -434,7 +445,7 @@ class GameEngine {
       this.sfx.playTrap();
       this.spawnParticles(nx, ny, '#ef4444', 15);
       this.addFloatingText(nx, ny, '-15 HP', '#ef4444');
-      this.addLog(`⚠️ Triggered Trap! (-15 HP)`);
+      this.addLog(`💥 Trap triggered! (-15 HP)`);
       if (this.player.hp <= 0) this.handlePlayerDeath();
     }
 
@@ -449,7 +460,7 @@ class GameEngine {
       this.sfx.playChest();
       this.spawnParticles(nx, ny, '#f59e0b', 20);
       this.addFloatingText(nx, ny, `+${scoreGain} PTS`, '#f59e0b');
-      this.addLog(`💰 Found Vault Chest! (+${scoreGain} Score, +25 HP)`);
+      this.addLog(`💎 Chest opened (+${scoreGain} pts, +25 HP)`);
     }
 
     // Check Exit Portal
@@ -481,20 +492,20 @@ class GameEngine {
         e.hp -= dmg;
         hitAny = true;
         this.sfx.playHit();
-        this.spawnParticles(e.x, e.y, '#38bdf8', 12);
-        this.addFloatingText(e.x, e.y, `-${dmg}`, '#38bdf8');
+        this.spawnParticles(e.x, e.y, '#4f8ff7', 12);
+        this.addFloatingText(e.x, e.y, `-${dmg}`, '#4f8ff7');
         if (e.hp <= 0) {
           this.telemetry.enemies_killed += 1;
           const scoreVal = e.isElite ? 150 : 60;
           this.player.score += scoreVal;
-          this.addFloatingText(e.x, e.y, `+${scoreVal}`, '#a78bfa');
-          this.addLog(`⚔ Slain ${e.isElite ? 'Elite Monster' : 'Monster'}! (+${scoreVal} PTS)`);
+          this.addFloatingText(e.x, e.y, `+${scoreVal}`, '#6ba1ff');
+          this.addLog(`⚔️ ${e.isElite ? 'Elite' : 'Enemy'} slain (+${scoreVal} pts)`);
         }
       }
     });
 
     if (hitAny) {
-      this.spawnParticles(this.player.x, this.player.y, '#8b5cf6', 10);
+      this.spawnParticles(this.player.x, this.player.y, '#4f8ff7', 10);
     }
   }
 
@@ -670,6 +681,26 @@ class GameEngine {
       }
     }
 
+    // Wall edge shadows for depth
+    for (let y = 0; y < this.mapData.height; y++) {
+      for (let x = 0; x < this.mapData.width; x++) {
+        if (isLowVis && !this.explored[`${x},${y}`]) continue;
+        const tile = this.mapData.tiles[y][x];
+        if (tile === Tile.WALL) {
+          // Shadow on south edge if floor below
+          if (y + 1 < this.mapData.height && this.mapData.tiles[y+1][x] !== Tile.WALL) {
+            this.ctx.fillStyle = 'rgba(0,0,0,0.35)';
+            this.ctx.fillRect(x * this.tileSize, (y+1) * this.tileSize, this.tileSize, 2);
+          }
+          // Shadow on east edge if floor to right
+          if (x + 1 < this.mapData.width && this.mapData.tiles[y][x+1] !== Tile.WALL) {
+            this.ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            this.ctx.fillRect((x+1) * this.tileSize, y * this.tileSize, 2, this.tileSize);
+          }
+        }
+      }
+    }
+
 
 
     // Dynamic Torch Lighting Effects around Player & Exit
@@ -683,89 +714,135 @@ class GameEngine {
     this.ctx.fillStyle = torchGlow;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Draw Traps
+    // Draw Traps (X marks)
     this.traps.forEach(t => {
       if (isLowVis && !this.explored[`${t.x},${t.y}`]) return;
-      this.ctx.fillStyle = t.triggered ? '#7f1d1d' : '#ef4444';
+      const tx = (t.x + 0.5) * this.tileSize;
+      const ty = (t.y + 0.5) * this.tileSize;
+      const s = this.tileSize * 0.3;
+      this.ctx.strokeStyle = t.triggered ? '#5c2020' : '#e05252';
+      this.ctx.lineWidth = t.triggered ? 1.5 : 2.5;
       this.ctx.beginPath();
-      this.ctx.arc((t.x + 0.5) * this.tileSize, (t.y + 0.5) * this.tileSize, 5, 0, Math.PI * 2);
-      this.ctx.fill();
+      this.ctx.moveTo(tx - s, ty - s); this.ctx.lineTo(tx + s, ty + s);
+      this.ctx.moveTo(tx + s, ty - s); this.ctx.lineTo(tx - s, ty + s);
+      this.ctx.stroke();
     });
 
-    // Draw Chests
+    // Draw Chests (square with lid line)
     this.chests.forEach(c => {
       if (isLowVis && !this.explored[`${c.x},${c.y}`]) return;
-      this.ctx.fillStyle = c.opened ? '#78350f' : '#f59e0b';
-      this.ctx.fillRect(c.x * this.tileSize + 4, c.y * this.tileSize + 4, this.tileSize - 8, this.tileSize - 8);
+      const cx = c.x * this.tileSize + 4;
+      const cy = c.y * this.tileSize + 4;
+      const cw = this.tileSize - 8;
+      const ch = this.tileSize - 8;
+      this.ctx.fillStyle = c.opened ? '#4a3010' : '#d4a03c';
+      this.ctx.fillRect(cx, cy, cw, ch);
+      if (!c.opened) {
+        this.ctx.strokeStyle = '#8b6914';
+        this.ctx.lineWidth = 1.5;
+        this.ctx.beginPath();
+        this.ctx.moveTo(cx, cy + ch * 0.33);
+        this.ctx.lineTo(cx + cw, cy + ch * 0.33);
+        this.ctx.stroke();
+        // Small latch
+        this.ctx.fillStyle = '#fff8';
+        this.ctx.fillRect(cx + cw * 0.4, cy + ch * 0.25, cw * 0.2, ch * 0.16);
+      }
     });
 
-    // Draw Exit Portal with Aura
+    // Draw Exit Portal (concentric rings)
     const ex = (this.mapData.exit.x + 0.5) * this.tileSize;
     const ey = (this.mapData.exit.y + 0.5) * this.tileSize;
-    const portalGlow = this.ctx.createRadialGradient(ex, ey, 2, ex, ey, 20);
-    portalGlow.addColorStop(0, '#06b6d4');
-    portalGlow.addColorStop(1, 'rgba(6, 182, 212, 0)');
-    this.ctx.fillStyle = portalGlow;
+    const pulsePhase = (performance.now() / 800) % (Math.PI * 2);
+    const pulseScale = 1 + Math.sin(pulsePhase) * 0.15;
+    for (let ring = 3; ring >= 1; ring--) {
+      const r = (this.tileSize * 0.35 * ring / 3) * pulseScale;
+      this.ctx.strokeStyle = `rgba(79, 143, 247, ${0.3 + ring * 0.2})`;
+      this.ctx.lineWidth = ring === 1 ? 2.5 : 1.5;
+      this.ctx.beginPath();
+      this.ctx.arc(ex, ey, r, 0, Math.PI * 2);
+      this.ctx.stroke();
+    }
+    this.ctx.fillStyle = '#4f8ff7';
     this.ctx.beginPath();
-    this.ctx.arc(ex, ey, 20, 0, Math.PI * 2);
+    this.ctx.arc(ex, ey, 3, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Draw Enemies
+    // Draw Enemies (triangles)
     this.enemies.forEach(e => {
       if (e.hp <= 0) return;
       if (isLowVis && !this.explored[`${e.x},${e.y}`]) return;
 
       const exPixel = (e.x + 0.5) * this.tileSize;
       const eyPixel = (e.y + 0.5) * this.tileSize;
+      const halfSize = this.tileSize / 2 - 2;
 
-      this.ctx.fillStyle = e.isElite ? '#ec4899' : activePalette[Tile.ENEMY];
+      // Direction toward player
+      const dx = this.player.x - e.x;
+      const dy = this.player.y - e.y;
+      const angle = Math.atan2(dy, dx);
 
+      this.ctx.save();
+      this.ctx.translate(exPixel, eyPixel);
+      this.ctx.rotate(angle - Math.PI / 2);
+
+      this.ctx.fillStyle = e.isElite ? '#c74082' : '#e05252';
       if (e.isElite) {
-        this.ctx.shadowColor = '#ec4899';
-        this.ctx.shadowBlur = 10;
+        this.ctx.strokeStyle = '#fff';
+        this.ctx.lineWidth = 1.5;
       }
-
       this.ctx.beginPath();
-      this.ctx.arc(exPixel, eyPixel, this.tileSize / 2 - 2, 0, Math.PI * 2);
+      this.ctx.moveTo(0, -halfSize);
+      this.ctx.lineTo(-halfSize * 0.75, halfSize * 0.7);
+      this.ctx.lineTo(halfSize * 0.75, halfSize * 0.7);
+      this.ctx.closePath();
       this.ctx.fill();
-      this.ctx.shadowBlur = 0;
+      if (e.isElite) this.ctx.stroke();
+
+      this.ctx.restore();
 
       // Enemy HP Bar
       const hpWidth = (this.tileSize - 4) * (e.hp / e.maxHp);
-      this.ctx.fillStyle = '#10b981';
-      this.ctx.fillRect(e.x * this.tileSize + 2, e.y * this.tileSize - 4, hpWidth, 3);
+      this.ctx.fillStyle = '#2a2a2a';
+      this.ctx.fillRect(e.x * this.tileSize + 2, e.y * this.tileSize - 5, this.tileSize - 4, 3);
+      this.ctx.fillStyle = '#3dba72';
+      this.ctx.fillRect(e.x * this.tileSize + 2, e.y * this.tileSize - 5, hpWidth, 3);
     });
 
-    // Draw Player Character (High-Contrast Hero Avatar)
+    // Draw Player Character (Diamond shape)
     const isInvuln = this.player.invulnerableTimer > 0;
-    const blinkAlpha = isInvuln ? (Math.floor(performance.now() / 120) % 2 === 0 ? 0.3 : 0.95) : 1.0;
+    const blinkAlpha = isInvuln ? (Math.floor(performance.now() / 120) % 2 === 0 ? 0.35 : 0.95) : 1.0;
 
     this.ctx.save();
     this.ctx.globalAlpha = blinkAlpha;
 
-    // Outer Hero Aura Glow
-    const heroGlow = this.ctx.createRadialGradient(pxPixel, pyPixel, 2, pxPixel, pyPixel, this.tileSize * 1.2);
-    heroGlow.addColorStop(0, isInvuln ? 'rgba(56, 189, 248, 0.8)' : 'rgba(0, 240, 255, 0.7)');
-    heroGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    this.ctx.fillStyle = heroGlow;
+    // Subtle aura
+    const auraGlow = this.ctx.createRadialGradient(pxPixel, pyPixel, 2, pxPixel, pyPixel, this.tileSize * 0.9);
+    auraGlow.addColorStop(0, isInvuln ? 'rgba(79, 143, 247, 0.5)' : 'rgba(79, 143, 247, 0.35)');
+    auraGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    this.ctx.fillStyle = auraGlow;
     this.ctx.beginPath();
-    this.ctx.arc(pxPixel, pyPixel, this.tileSize * 1.2, 0, Math.PI * 2);
+    this.ctx.arc(pxPixel, pyPixel, this.tileSize * 0.9, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Dark Stroke Outline for High Contrast against ANY Floor Color
-    this.ctx.fillStyle = isInvuln ? '#38bdf8' : '#00f0ff';
-    this.ctx.strokeStyle = '#050609';
-    this.ctx.lineWidth = 2.5;
-
+    // Diamond body
+    const hs = this.tileSize / 2 - 2;
+    this.ctx.fillStyle = isInvuln ? '#6ba1ff' : '#4f8ff7';
+    this.ctx.strokeStyle = '#0c0e14';
+    this.ctx.lineWidth = 2;
     this.ctx.beginPath();
-    this.ctx.arc(pxPixel, pyPixel, this.tileSize / 2 - 2, 0, Math.PI * 2);
+    this.ctx.moveTo(pxPixel, pyPixel - hs);       // top
+    this.ctx.lineTo(pxPixel + hs * 0.7, pyPixel);  // right
+    this.ctx.lineTo(pxPixel, pyPixel + hs);        // bottom
+    this.ctx.lineTo(pxPixel - hs * 0.7, pyPixel);  // left
+    this.ctx.closePath();
     this.ctx.fill();
     this.ctx.stroke();
 
-    // Inner White Core
+    // Inner highlight
     this.ctx.fillStyle = '#ffffff';
     this.ctx.beginPath();
-    this.ctx.arc(pxPixel, pyPixel, this.tileSize / 4, 0, Math.PI * 2);
+    this.ctx.arc(pxPixel, pyPixel - hs * 0.2, hs * 0.2, 0, Math.PI * 2);
     this.ctx.fill();
 
     this.ctx.restore();
@@ -774,7 +851,7 @@ class GameEngine {
 
     // Sword Swing Arc Effect
     if (this.player.attackCooldown > 0.12) {
-      this.ctx.strokeStyle = '#a78bfa';
+      this.ctx.strokeStyle = '#4f8ff7';
       this.ctx.lineWidth = 3;
       this.ctx.beginPath();
       this.ctx.arc(pxPixel, pyPixel, this.tileSize * 1.3, 0, Math.PI * 2);
@@ -796,7 +873,30 @@ class GameEngine {
       this.ctx.globalAlpha = 1.0;
     });
 
+    // Pause Overlay
+    if (this.isPaused) {
+      this.ctx.fillStyle = 'rgba(12, 14, 20, 0.75)';
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.font = 'bold 20px "JetBrains Mono", monospace';
+      this.ctx.textAlign = 'center';
+      this.ctx.fillText('PAUSED', this.canvas.width / 2, this.canvas.height / 2 - 5);
+      this.ctx.font = '12px "Inter", sans-serif';
+      this.ctx.fillStyle = '#7e8a9e';
+      this.ctx.fillText('Press P or click Play to resume', this.canvas.width / 2, this.canvas.height / 2 + 20);
+    }
+
     this.ctx.restore();
+  }
+
+  togglePause() {
+    this.isPaused = !this.isPaused;
+    const btn = document.getElementById('pauseBtn');
+    if (btn) {
+      btn.textContent = this.isPaused ? '▶ Play' : '⏸ Pause';
+      btn.classList.toggle('active', this.isPaused);
+    }
+    this.addLog(this.isPaused ? '⏸ Game Paused' : '▶ Game Resumed');
   }
 
   updateHUD() {
@@ -826,7 +926,7 @@ class GameEngine {
 
     const themeBadge = document.getElementById('hudThemeBadge');
     if (themeBadge && this.currentConfig) {
-      const themeName = this.currentConfig.theme_name || (this.currentConfig.theme === 'light' ? '⚪ Light Marble Vault' : '🌑 Dark Obsidian Abyss');
+      const themeName = this.currentConfig.theme_name || (this.currentConfig.theme === 'light' ? 'Light Marble Vault' : 'Dark Obsidian Abyss');
       themeBadge.textContent = themeName;
       if (this.currentConfig.theme === 'light') {
         themeBadge.style.background = '#f1f5f9';

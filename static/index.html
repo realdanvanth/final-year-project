@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Closed-Loop LLM PCG Research Platform & Game Engine</title>
+  <title>MAP-Elites Evolutionary PCG | Research Platform</title>
   <link rel="stylesheet" href="/static/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -11,24 +11,23 @@
 
   <header>
     <div class="logo-group">
-      <span class="logo-icon">🔮</span>
       <div>
-        <h1>MAP-Elites Evolutionary PCG Engine v2</h1>
-        <p class="subtitle">Procedural Content Generation with Quality-Diversity Evolutionary Search & Adaptive Playstyle Feedback Loop</p>
+        <h1>MAP-Elites Evolutionary PCG Engine</h1>
+        <p class="subtitle">Quality-Diversity Procedural Content Generation with Adaptive Playstyle Feedback</p>
       </div>
     </div>
     <div style="display: flex; gap: 0.6rem; align-items: center;">
       <button id="muteBtn" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="toggleAudio()">
-        🔊 Audio: ON
+        Audio: ON
       </button>
       <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="openExplainerModal()">
-        🔬 How PCG Works
+        System Overview
       </button>
       <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="openAnalyticsModal()">
-        📈 Analytics & Plots
+        Analytics
       </button>
       <button class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="exportSessionData()">
-        📥 Export JSON
+        Export Data
       </button>
     </div>
   </header>
@@ -38,10 +37,12 @@
     <!-- Left Column: Playable Canvas Game Engine -->
     <div class="glass-panel" style="position: relative;">
       <div class="panel-title">
-        <span>🎮 Dungeon Game Engine</span>
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span>Game Engine</span>
+        <div style="display: flex; gap: 0.4rem; align-items: center;">
           <span id="hudThemeBadge" class="badge" style="font-size: 0.65rem;">Dark Obsidian</span>
           <span id="hudLevel" style="color: var(--accent); font-weight: bold;">Lvl 1</span>
+          <button id="pauseBtn" class="btn btn-secondary" style="padding: 0.15rem 0.55rem; font-size: 0.68rem; width: auto;" onclick="togglePauseGame()">⏸ Pause</button>
+          <button id="fullscreenBtn" class="btn btn-secondary" style="padding: 0.15rem 0.45rem; font-size: 0.72rem; width: auto;" title="Toggle Fullscreen (F)" onclick="toggleFullscreen()">⛶</button>
         </div>
       </div>
 
@@ -59,9 +60,9 @@
           </div>
 
           <div class="hud-card">
-            <span>⏱ <span id="hudTime">0.0s</span></span>
+            <span>Time: <span id="hudTime">0.0s</span></span>
             <span style="color: var(--border);">|</span>
-            <span>⭐ Score: <span id="hudScore">0</span></span>
+            <span>Score: <span id="hudScore">0</span></span>
           </div>
         </div>
       </div>
@@ -69,21 +70,23 @@
       <div class="controls-hint">
         <span>Move: <span class="key-cap">W</span><span class="key-cap">A</span><span class="key-cap">S</span><span class="key-cap">D</span> / <span class="key-cap">Arrow Keys</span></span>
         <span>Attack: <span class="key-cap">Space</span> / <span class="key-cap">Left Click</span></span>
-        <span>Objective: Reach portal <span style="color: var(--teal);">■</span> to clear level!</span>
+        <span>Pause: <span class="key-cap">P</span></span>
+        <span>Fullscreen: <span class="key-cap">F</span></span>
+        <span>Objective: Reach exit portal to clear level</span>
       </div>
 
       <div style="margin-top: 1rem;">
         <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; font-family: 'JetBrains Mono';">SYSTEM TELEMETRY LOGS</div>
         <div id="gameLogs" style="background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem; font-family: 'JetBrains Mono'; font-size: 0.72rem; height: 80px; overflow-y: auto;">
-          <div class="log-item">[System] Initializing LLM PCG Research Server... Click "New Session" to start!</div>
+          <div class="log-item">[System] MAP-Elites PCG Engine initialized. Click "New Session" to start.</div>
         </div>
       </div>
     </div>
 
-    <!-- Right Column: Research Telemetry & LLM Feedback Inspector -->
+    <!-- Right Column: Research Telemetry & Evolutionary State -->
     <div class="glass-panel">
       <div class="panel-title">
-        <span>📊 Research Telemetry</span>
+        <span>Research Telemetry</span>
         <span class="badge" style="font-size: 0.65rem;">LIVE ADAPTATION</span>
       </div>
 
@@ -102,7 +105,7 @@
         </div>
         <div class="metric-row">
           <span class="metric-label">Chests Opened:</span>
-          <span id="mChests" class="metric-val" style="color: var(--gold);">0/0</span>
+          <span id="mChests" class="metric-val" style="color: var(--warning);">0/0</span>
         </div>
         <div class="metric-row">
           <span class="metric-label">Difficulty Rating:</span>
@@ -112,18 +115,18 @@
 
       <div class="ai-feed">
         <div class="ai-feed-header">
-          <span>🧠 AI Director Adaptation Rationale</span>
+          <span>Evolutionary Engine Adaptation Rationale</span>
         </div>
         <div id="aiRationale" class="ai-feed-body">
-          The closed-loop LLM Director will evaluate playstyle telemetry (clear speed, damage, retries) after each level and adapt PCG generation parameters for Level N+1.
+          The MAP-Elites evolutionary engine evaluates playstyle telemetry (clear speed, damage, retries) after each level and adapts PCG genome parameters for Level N+1.
         </div>
       </div>
 
       <!-- MAP-Elites 10x10 Heatmap & Evolutionary Stats -->
       <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; margin-bottom: 1rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-          <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent2); font-family: 'JetBrains Mono';">
-            🧬 MAP-ELITES ARCHIVE (10x10)
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono';">
+            MAP-Elites Archive (10x10)
           </span>
           <span id="evoCoverage" class="badge" style="font-size: 0.65rem;">0% (0/100)</span>
         </div>
@@ -132,43 +135,43 @@
         </div>
         <div style="font-size: 0.68rem; font-family: 'JetBrains Mono'; color: var(--muted); display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem;">
           <div>Avg Fitness: <span id="evoAvgFitness" style="color: #fff;">0.00</span></div>
-          <div>Max Fitness: <span id="evoMaxFitness" style="color: var(--accent2);">0.00</span></div>
+          <div>Max Fitness: <span id="evoMaxFitness" style="color: var(--accent);">0.00</span></div>
           <div>Generations: <span id="evoGenerations" style="color: #fff;">0</span></div>
           <div>Niche: <span id="playerNicheLabel" style="color: var(--accent);">Cell [?,?]</span></div>
         </div>
       </div>
 
-      <!-- LLM Input / Output Inspector Card -->
+      <!-- Narrative Inspector Card -->
       <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; margin-bottom: 1rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
           <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono';">
-            🔍 LORE LLM INSPECTOR
+            Narrative Inspector
           </span>
           <div style="display: flex; gap: 0.3rem;">
-            <button id="tabLlmInput" class="btn btn-secondary active" style="padding: 0.2rem 0.5rem; font-size: 0.65rem;" onclick="switchLlmInspectorTab('input')">📥 Given</button>
-            <button id="tabLlmOutput" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.65rem;" onclick="switchLlmInspectorTab('output')">📤 Returned</button>
+            <button id="tabLlmInput" class="btn btn-secondary active" style="padding: 0.2rem 0.5rem; font-size: 0.65rem;" onclick="switchLlmInspectorTab('input')">Input</button>
+            <button id="tabLlmOutput" class="btn btn-secondary" style="padding: 0.2rem 0.5rem; font-size: 0.65rem;" onclick="switchLlmInspectorTab('output')">Output</button>
           </div>
         </div>
 
         <div id="llmInputPane" style="font-family: 'JetBrains Mono'; font-size: 0.68rem; color: var(--muted); max-height: 100px; overflow-y: auto; white-space: pre-wrap; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 6px;">
-📥 Lore LLM Prompt Input Vector will be displayed after Level 1 completion.
+Narrative prompt input will be displayed after Level 1 completion.
         </div>
 
-        <div id="llmOutputPane" style="display: none; font-family: 'JetBrains Mono'; font-size: 0.68rem; color: var(--teal); max-height: 100px; overflow-y: auto; white-space: pre-wrap; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 6px;">
-📤 Lore LLM Output Payload will be displayed after Level 1 completion.
+        <div id="llmOutputPane" style="display: none; font-family: 'JetBrains Mono'; font-size: 0.68rem; color: var(--secondary); max-height: 100px; overflow-y: auto; white-space: pre-wrap; background: rgba(0,0,0,0.4); padding: 0.5rem; border-radius: 6px;">
+Narrative output will be displayed after Level 1 completion.
         </div>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;">
         <button id="btnNewPrompt" class="btn" onclick="openInitialPromptModal()">
-          🔮 START NEW PROMPT SESSION
+          New Session
         </button>
         <div style="display: flex; gap: 0.5rem;">
           <button class="btn btn-secondary" style="flex: 1; font-size: 0.75rem;" onclick="openAnalyticsModal()">
-            📊 Live Charts & Folder Plots
+            Live Charts
           </button>
           <button class="btn btn-secondary" style="flex: 1; font-size: 0.75rem;" onclick="exportSessionData()">
-            📥 Export JSON
+            Export Data
           </button>
         </div>
       </div>
@@ -180,7 +183,7 @@
   <div style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
     <div class="glass-panel">
       <div class="panel-title">
-        <span>📈 PCG Parameter Evolution (Line Chart)</span>
+        <span>PCG Parameter Evolution</span>
         <span class="badge" style="font-size: 0.65rem;">GENOME SHIFTS</span>
       </div>
       <div style="height: 220px; position: relative;">
@@ -190,7 +193,7 @@
 
     <div class="glass-panel">
       <div class="panel-title">
-        <span>📊 Player Performance Telemetry (Bar Chart)</span>
+        <span>Player Performance Telemetry</span>
         <span class="badge" style="font-size: 0.65rem;">CLEAR SPEED & DAMAGE</span>
       </div>
       <div style="height: 220px; position: relative;">
@@ -204,38 +207,38 @@
   <div id="initialPromptModal" class="modal-overlay active">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title">🔮 Create Initial Level via LLM Prompt</div>
+        <div class="modal-title">Initialize Level 1</div>
         <div style="display: flex; gap: 0.5rem; align-items: center;">
           <div class="badge">Session Setup</div>
-          <button class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;" onclick="closeInitialPromptModal()">✕ Close / Play</button>
+          <button class="btn btn-secondary" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;" onclick="closeInitialPromptModal()">Close</button>
         </div>
       </div>
 
 
       <div style="font-size: 0.85rem; color: var(--muted);">
-        Describe your dream initial dungeon layout or choose a preset. The LLM will parse your description into PCG generation parameters:
+        Describe your initial dungeon layout or select a preset. The system will parse your description into PCG generation parameters:
       </div>
 
       <div>
-        <label style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; display: block;">QUICK UNRESTRICTED PRESETS:</label>
+        <label style="font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem; display: block;">THEME PRESETS:</label>
         <div class="pref-options" style="grid-template-columns: repeat(3, 1fr);">
-          <button class="pref-btn active" onclick="selectInitialPreset(this, 'A dark obsidian abyss with narrow ambush corridors, deadly traps, and hidden treasure vaults')">🔥 Dark Obsidian</button>
-          <button class="pref-btn" onclick="selectInitialPreset(this, 'A bright light map with white room sanctuary and marble pillars')">⚪ Light Marble</button>
-          <button class="pref-btn" onclick="selectInitialPreset(this, 'A cyberpunk neon grid matrix with futuristic laser traps and fast enemies')">⚡ Cyberpunk Neon</button>
-          <button class="pref-btn" onclick="selectInitialPreset(this, 'A volcanic magma citadel with molten lava floors, fire traps, and intense difficulty')">🌋 Volcanic Magma</button>
-          <button class="pref-btn" onclick="selectInitialPreset(this, 'A glacial crystal vault with frozen blue ice chambers and crystal chests')">❄️ Glacial Crystal</button>
-          <button class="pref-btn" onclick="selectInitialPreset(this, 'An emerald forest sanctuary with lush green moss floors and nature hazards')">🌲 Emerald Forest</button>
+          <button class="pref-btn active" onclick="selectInitialPreset(this, 'A dark obsidian abyss with narrow ambush corridors, deadly traps, and hidden treasure vaults')">Dark Obsidian</button>
+          <button class="pref-btn" onclick="selectInitialPreset(this, 'A bright light map with white room sanctuary and marble pillars')">Light Marble</button>
+          <button class="pref-btn" onclick="selectInitialPreset(this, 'A cyberpunk neon grid matrix with futuristic laser traps and fast enemies')">Cyberpunk Neon</button>
+          <button class="pref-btn" onclick="selectInitialPreset(this, 'A volcanic magma citadel with molten lava floors, fire traps, and intense difficulty')">Volcanic Magma</button>
+          <button class="pref-btn" onclick="selectInitialPreset(this, 'A glacial crystal vault with frozen blue ice chambers and crystal chests')">Glacial Crystal</button>
+          <button class="pref-btn" onclick="selectInitialPreset(this, 'An emerald forest sanctuary with lush green moss floors and nature hazards')">Emerald Forest</button>
         </div>
-        <textarea id="initialPromptText" class="custom-pref" style="margin-top: 0.6rem; height: 70px;" placeholder="Describe any custom initial dungeon prompt...">A dark obsidian abyss with narrow ambush corridors, deadly traps, and hidden treasure vaults</textarea>
+        <textarea id="initialPromptText" class="custom-pref" style="margin-top: 0.6rem; height: 70px;" placeholder="Describe a custom initial dungeon layout...">A dark obsidian abyss with narrow ambush corridors, deadly traps, and hidden treasure vaults</textarea>
 
       </div>
 
-      <div id="initialThinking" style="display: none; font-size: 0.8rem; color: var(--teal); font-family: 'JetBrains Mono'; text-align: center; padding: 0.6rem; background: rgba(6,182,212,0.1); border-radius: 8px;">
-        🤖 OpenRouter LLM parsing description & generating Level 1 map parameters...
+      <div id="initialThinking" style="display: none; font-size: 0.8rem; color: var(--secondary); font-family: 'JetBrains Mono'; text-align: center; padding: 0.6rem; background: rgba(56,178,172,0.08); border-radius: 6px;">
+        Parsing prompt and generating Level 1 parameters...
       </div>
 
       <button id="btnGenerateInitial" class="btn" onclick="submitInitialPrompt()">
-        ⚡ GENERATE PROMPT-GUIDED LEVEL 1
+        Generate Level 1
       </button>
     </div>
   </div>
@@ -244,12 +247,12 @@
   <div id="levelModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title">🎉 LEVEL CLEAR!</div>
+        <div class="modal-title">LEVEL CLEAR</div>
         <div class="badge" id="modalLevelBadge">Level 1 Complete</div>
       </div>
 
       <div style="font-size: 0.85rem; color: var(--muted);">
-        Gameplay telemetry evaluated! MAP-Elites engine will select and mutate optimal map DNA for Level N+1:
+        Gameplay telemetry evaluated. The evolutionary engine will select and mutate optimal map DNA for Level N+1.
       </div>
 
       <div class="telemetry-list" style="margin-bottom: 0.5rem;">
@@ -267,8 +270,8 @@
         </div>
       </div>
 
-      <div id="llmThinking" style="display: none; font-size: 0.8rem; color: var(--teal); font-family: 'JetBrains Mono'; text-align: center; padding: 0.6rem; background: rgba(6,182,212,0.1); border-radius: 8px;">
-        🧬 MAP-Elites Quality-Diversity Engine selecting parents & mutating genome for Level N+1...
+      <div id="llmThinking" style="display: none; font-size: 0.8rem; color: var(--secondary); font-family: 'JetBrains Mono'; text-align: center; padding: 0.6rem; background: rgba(56,178,172,0.08); border-radius: 6px;">
+        Evolutionary engine selecting parent genomes and mutating for Level N+1...
       </div>
 
       <div id="paramDiffBox" class="param-comparison" style="display: none;">
@@ -276,14 +279,14 @@
           <div style="color: var(--muted);">Level N Genome</div>
           <div id="prevConfigView">Difficulty: 0.5</div>
         </div>
-        <div class="param-box" style="border-color: var(--accent2);">
-          <div style="color: var(--accent2);">Level N+1 Evolved Genome</div>
+        <div class="param-box" style="border-color: var(--accent);">
+          <div style="color: var(--accent);">Level N+1 Evolved Genome</div>
           <div id="nextConfigView">Difficulty: 0.85</div>
         </div>
       </div>
 
       <button id="btnNextLevel" class="btn" onclick="submitFeedbackNextLevel()">
-        🧬 EVOLVE NEXT LEVEL VIA MAP-ELITES
+        Evolve Next Level
       </button>
     </div>
   </div>
@@ -292,8 +295,8 @@
   <div id="analyticsModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 800px; width: 90%;">
       <div class="modal-header">
-        <div class="modal-title">📊 Session Analytics & Saved Plots Folder</div>
-        <button class="btn btn-secondary" style="padding: 0.2rem 0.6rem;" onclick="closeAnalyticsModal()">✕ Close</button>
+        <div class="modal-title">Session Analytics</div>
+        <button class="btn btn-secondary" style="padding: 0.2rem 0.6rem;" onclick="closeAnalyticsModal()">Close</button>
       </div>
 
       <div style="font-size: 0.82rem; color: var(--muted); margin-bottom: 1rem;">
@@ -303,15 +306,15 @@
       <!-- Live CSV Download Buttons -->
       <div style="display: flex; gap: 0.8rem; margin-bottom: 1.2rem;">
         <a id="btnDownloadTelemetryCsv" href="/research_analytics/session_telemetry.csv" download class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none; font-size: 0.78rem;">
-          📑 Download <code>session_telemetry.csv</code>
+          Download <code>session_telemetry.csv</code>
         </a>
         <a id="btnDownloadLlmCsv" href="/research_analytics/llm_parameters_history.csv" download class="btn btn-secondary" style="flex: 1; text-align: center; text-decoration: none; font-size: 0.78rem;">
-          📑 Download <code>llm_parameters_history.csv</code>
+          Download <code>llm_parameters_history.csv</code>
         </a>
       </div>
 
-      <div style="font-size: 0.8rem; font-weight: 700; color: var(--teal); font-family: 'JetBrains Mono'; margin-bottom: 0.6rem;">
-        📁 SAVED FOLDER PNG PLOTS (research_analytics/plots/)
+      <div style="font-size: 0.8rem; font-weight: 700; color: var(--secondary); font-family: 'JetBrains Mono'; margin-bottom: 0.6rem;">
+        Saved Plots (research_analytics/plots/)
       </div>
 
       <div id="plotsGallery" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-height: 300px; overflow-y: auto;">
@@ -326,34 +329,34 @@
   <div id="explainerModal" class="modal-overlay">
     <div class="modal-card" style="max-width: 850px; width: 90%;">
       <div class="modal-header">
-        <div class="modal-title">🔬 How Closed-Loop Evolutionary LLM-PCG Works</div>
-        <button class="btn btn-secondary" style="padding: 0.2rem 0.6rem;" onclick="closeExplainerModal()">✕ Close</button>
+        <div class="modal-title">System Architecture: Evolutionary PCG Pipeline</div>
+        <button class="btn btn-secondary" style="padding: 0.2rem 0.6rem;" onclick="closeExplainerModal()">Close</button>
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin: 1rem 0;">
-        <div style="background: rgba(139,92,246,0.1); border: 1px solid var(--accent); border-radius: 8px; padding: 0.8rem; font-size: 0.75rem;">
+        <div style="background: rgba(79,143,247,0.08); border: 1px solid var(--accent); border-radius: 6px; padding: 0.8rem; font-size: 0.75rem;">
           <div style="font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono'; margin-bottom: 0.4rem;">1. GENOTYPE</div>
           <div style="color: var(--muted);">Parameter Vector <b>G_N</b> (Difficulty, Room Density, Traps, Corridor Width, Enemy AI Type).</div>
         </div>
 
-        <div style="background: rgba(6,182,212,0.1); border: 1px solid var(--teal); border-radius: 8px; padding: 0.8rem; font-size: 0.75rem;">
-          <div style="font-weight: 700; color: var(--teal); font-family: 'JetBrains Mono'; margin-bottom: 0.4rem;">2. PHENOTYPE</div>
+        <div style="background: rgba(56,178,172,0.08); border: 1px solid var(--secondary); border-radius: 6px; padding: 0.8rem; font-size: 0.75rem;">
+          <div style="font-weight: 700; color: var(--secondary); font-family: 'JetBrains Mono'; margin-bottom: 0.4rem;">2. PHENOTYPE</div>
           <div style="color: var(--muted);">C++ PCG Generator compiles genome into 2D tile layout map & spatial spawns.</div>
         </div>
 
-        <div style="background: rgba(245,158,11,0.1); border: 1px solid var(--gold); border-radius: 8px; padding: 0.8rem; font-size: 0.75rem;">
-          <div style="font-weight: 700; color: var(--gold); font-family: 'JetBrains Mono'; margin-bottom: 0.4rem;">3. FITNESS (F)</div>
+        <div style="background: rgba(212,160,60,0.08); border: 1px solid var(--warning); border-radius: 6px; padding: 0.8rem; font-size: 0.75rem;">
+          <div style="font-weight: 700; color: var(--warning); font-family: 'JetBrains Mono'; margin-bottom: 0.4rem;">3. FITNESS</div>
           <div style="color: var(--muted);">Real-time telemetry collects Clear Speed, Damage, Retries, Kills & Exploration %.</div>
         </div>
 
-        <div style="background: rgba(239,68,68,0.1); border: 1px solid var(--danger); border-radius: 8px; padding: 0.8rem; font-size: 0.75rem;">
+        <div style="background: rgba(224,82,82,0.08); border: 1px solid var(--danger); border-radius: 6px; padding: 0.8rem; font-size: 0.75rem;">
           <div style="font-weight: 700; color: var(--danger); font-family: 'JetBrains Mono'; margin-bottom: 0.4rem;">4. MAP-ELITES MUTATION</div>
           <div style="color: var(--muted);">MAP-Elites archive breeds <b>G_{N+1} = G_N + ΔG</b> via tournament selection & crossover.</div>
         </div>
       </div>
 
-      <div style="font-size: 0.8rem; color: #cbd5e1; background: rgba(0,0,0,0.3); padding: 0.8rem; border-radius: 8px; font-family: 'JetBrains Mono'; line-height: 1.5;">
-        ⚡ <strong>Research Objective:</strong> Discovers human playstyles algorithmically using telemetry feedback vectors instead of predefined static game design rules. Every level mutates parameters dynamically to match your evolving skill curve.
+      <div style="font-size: 0.8rem; color: #cbd5e1; background: rgba(0,0,0,0.3); padding: 0.8rem; border-radius: 6px; font-family: 'JetBrains Mono'; line-height: 1.5;">
+        <strong>Research Objective:</strong> Discovers human playstyles algorithmically using telemetry feedback vectors instead of predefined static game design rules. Each level mutates parameters dynamically to match the player's evolving skill curve.
       </div>
     </div>
   </div>
@@ -428,8 +431,40 @@
       if (!game) return;
       game.sfx.muted = !game.sfx.muted;
       const btn = document.getElementById('muteBtn');
-      btn.textContent = game.sfx.muted ? '🔇 Audio: OFF' : '🔊 Audio: ON';
+      btn.textContent = game.sfx.muted ? 'Audio: OFF' : 'Audio: ON';
     }
+
+    function togglePauseGame() {
+      if (window.game) {
+        window.game.togglePause();
+      }
+    }
+
+    function toggleFullscreen() {
+      const container = document.querySelector('.canvas-container');
+      if (!container) return;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (container.requestFullscreen) {
+          container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      const targetTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+      if (targetTag === 'input' || targetTag === 'textarea') return;
+      if (e.key.toLowerCase() === 'f') {
+        toggleFullscreen();
+      }
+    });
 
     function openInitialPromptModal() {
       document.getElementById('initialPromptModal').classList.add('active');
@@ -488,7 +523,7 @@
         if (data.status === 'success') {
           game.levelNumber = 1;
           game.loadMap(data.map);
-          game.addLog(`✨ Level 1 Generated by Prompt: "${promptText.substring(0, 35)}..."`);
+          game.addLog(`▶ Level 1 generated from prompt: "${promptText.substring(0, 35)}..."`);
         }
       } catch (e) {
         console.error('Error parsing initial prompt:', e);
@@ -542,7 +577,7 @@
           const evalRecord = evalResult.eval_record;
 
           document.getElementById('aiRationale').textContent = 
-            `[MAP-Elites Fitness: ${evalRecord ? evalRecord.fitness.toFixed(4) : 'N/A'}] ${evalResult.adaptation_rationale}`;
+            `[Fitness: ${evalRecord ? evalRecord.fitness.toFixed(4) : 'N/A'}] ${evalResult.adaptation_rationale}`;
 
           if (evoDash && archiveStats) {
             evoDash.renderHeatmap(archiveStats, evalRecord ? evalRecord.grid_pos : null);
@@ -561,7 +596,7 @@
           setTimeout(() => {
             document.getElementById('levelModal').classList.remove('active');
             game.loadMap(data.next_map);
-            game.addLog(`🚀 Level ${game.levelNumber} Evolved via MAP-Elites Archive!`);
+            game.addLog(`↑ Level ${game.levelNumber} evolved via MAP-Elites archive`);
           }, 2000);
         }
       } catch (e) {
@@ -679,8 +714,8 @@
 
       gallery.innerHTML = plots.map(filename => `
         <div style="background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; padding: 0.5rem;">
-          <div style="font-size: 0.68rem; font-family: 'JetBrains Mono'; color: var(--teal); margin-bottom: 0.4rem;">
-            📷 ${filename}
+          <div style="font-size: 0.68rem; font-family: 'JetBrains Mono'; color: var(--secondary); margin-bottom: 0.4rem;">
+            ${filename}
           </div>
           <a href="/research_analytics/plots/${filename}" target="_blank">
             <img src="/research_analytics/plots/${filename}?t=${Date.now()}" style="width: 100%; border-radius: 4px; display: block;" alt="${filename}">
@@ -704,7 +739,7 @@
           a.href = URL.createObjectURL(blob);
           a.download = `${game.sessionId}_research_telemetry.json`;
           a.click();
-          game.addLog('📥 Exported research session JSON dataset!');
+          game.addLog('Session data exported as JSON');
         } else {
           alert('No session data recorded yet. Play a level first!');
         }
